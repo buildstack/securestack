@@ -1,0 +1,132 @@
+#!/bin/bash
+# Written by Paul McCarty <paulm@securestack.com.au> #
+
+stop () {
+	sudo /var/ossec/bin/ossec-control stop
+	# Daemons to manage go here #
+	daemons=(
+		wazuh-manager
+		fail2ban
+        	filebeat
+        	metricbeat
+		logstash
+		kibana
+		elasticsearch
+		maldet
+                clamd@scan
+                wazuh-api
+	)
+
+	for i in "${daemons[@]}"
+	do
+        	sudo rpm -qa | grep -q $i && echo "Disabling $i" && sudo systemctl stop $i && sudo systemctl disable $i
+	done
+	sudo rpm -qa | grep -q clamav-scanner && echo "Disabling clamd@scan" && sudo systemctl stop clamd@scan && sudo systemctl disable clamd@scan
+}
+
+start () {
+        sudo /var/ossec/bin/ossec-control start
+        # Daemons to manage go here #
+        daemons=(
+                wazuh-manager
+		fail2ban
+                elasticsearch
+                filebeat
+                metricbeat
+                logstash
+                kibana
+                #maldet
+                #clamd@scan
+                wazuh-api
+        )
+
+        for i in "${daemons[@]}"
+        do
+                sudo rpm -qa | grep -q $i && echo "Enabling $i" && sudo systemctl start $i && sudo systemctl enable $i
+        done
+        #rpm -qa | grep -q clamav-scanner && echo "Enabling clamd@scan" && sudo systemctl start clamd@scan && sudo systemctl enable clamd@scan
+}
+
+configure () {
+        echo "Define your local subnet here: "; read local_net
+	sudo ufw allow proto tcp from $local_net to any port 1514
+	sudo ufw allow proto tcp from $local_net to any port 1515
+        echo "Define your whitelist ips here= "; read -a white_list
+	for ip in ${white_list[@]}
+	do
+  		sudo ufw allow proto tcp from $ip to any port 22
+  		sudo ufw allow proto tcp from $ip to any port 5601
+	done
+
+	while true; do
+    		read -p "Do you want to enable clamav anti-virus? Default is no. [y/n] : " yn
+    		case $yn in
+        		[Yy]* ) echo "Enabling clamav..."; sudo sed -i "s/clamav:.*/clamav: '"enabled"'/g" $home/securestack.yml; sudo systemctl start clamd@scan; sudo systemctl enable clamd@scan; break;;
+        		[Nn]* ) echo "Disabling clamav..."; sudo sed -i "s/clamav:.*/clamav: '"disabled"'/g" $home/securestack.yml; sudo systemctl stop clamd@scan; sudo systemctl disable clamd@scan; break;;
+        		* ) echo "Please answer y or n.";;
+    		esac
+	done
+
+        while true; do
+                read -p "Do you want to enable Linux Malware Detect (LMD/maldet)? Default is no. [y/n] : " yn
+                case $yn in
+                        [Yy]* ) echo "Enabling maldet..."; sudo sed -i "s/maldet:.*/maldet: '"enabled"'/g" $home/securestack.yml; sudo systemctl start maldet; sudo systemctl enable maldet; break;;
+                        [Nn]* ) echo "Disabling maldet..."; sudo sed -i "s/maldet:.*/maldet: '"disabled"'/g" $home/securestack.yml; sudo systemctl stop maldet; sudo systemctl disable maldet; break;;
+                        * ) echo "Please answer y or n.";;
+                esac
+        done
+
+        while true; do
+                read -p "Do you want to enable fail2ban? Default is no. [y/n] : " yn
+                case $yn in
+                        [Yy]* ) echo "Enabling fail2ban..."; sudo sed -i "s/fail2ban:.*/fail2ban: '"enabled"'/g" $home/securestack.yml; sudo systemctl start fail2ban; sudo systemctl enable fail2ban; break;;
+                        [Nn]* ) echo "Disabling fail2ban..."; sudo sed -i "s/fail2ban:.*/fail2ban: '"disabled"'/g" $home/securestack.yml; sudo systemctl stop fail2ban; sudo systemctl disable fail2ban; break;;
+                        * ) echo "Please answer y or n.";;
+                esac
+        done
+
+        while true; do
+                read -p "Do you want to enable Metricbeat? Default is no. [y/n] : " yn
+                case $yn in
+                        [Yy]* ) echo "Enabling Metricbeat..."; sudo sed -i "s/metricbeat:.*/metricbeat: '"enabled"'/g" $home/securestack.yml; sudo systemctl start metricbeat; sudo systemctl enable metricbeat; break;;
+                        [Nn]* ) echo "Disabling Metricbeat..."; sudo sed -i "s/metricbeat:.*/metricbeat: '"disabled"'/g" $home/securestack.yml; sudo systemctl stop metricbeat; sudo systemctl disable metricbeat; break;;
+                        * ) echo "Please answer y or n.";;
+                esac
+        done
+
+        while true; do
+                read -p "Do you want to enable Filebeat? Default is no. [y/n] : " yn
+                case $yn in
+                        [Yy]* ) echo "Enabling Filebeat..."; sudo sed -i "s/filebeat:.*/filebeat: '"enabled"'/g" $home/securestack.yml; sudo systemctl start filebeat; sudo systemctl enable filebeat; break;;
+                        [Nn]* ) echo "Disabling Filebeat..."; sudo sed -i "s/filebeat:.*/filebeat: '"disabled"'/g" $home/securestack.yml; sudo systemctl stop filebeat; sudo systemctl disable filebeat; break;;
+                        * ) echo "Please answer y or n.";;
+                esac
+        done
+
+
+	#echo "Do you want to enable Web Application Firewall? y/n Default is no. "; read waf_ans
+	#echo "Do you want to harden this linux operating system? y/n Default is yes. "; read harden_ans
+}
+
+# Variables go here #
+home=/opt/securestack/
+
+case "$1" in
+
+help)  help
+    ;;
+stop)  stop
+    ;;
+start)  start
+    ;;
+configure)  configure
+    ;;
+status)  status $@
+    ;;
+*)  echo "SecureStack copyright 2017 - Paul McCarty"
+    echo "Usage: securestack (configure|stop|start|role)    "
+    echo " "
+    exit 1
+   ;;
+esac
+

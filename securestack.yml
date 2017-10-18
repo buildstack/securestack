@@ -1,0 +1,23 @@
+---
+### securestack_roles include naked (no roles), hardened (standard), server (elk, ossec-server, etc) ###
+securestack_role: "hardened"
+
+### individual modules ###
+clamav: 'disabled'
+rootkit_hunter: 'disabled'
+fail2ban: 'enabled'
+malware_detect: 'disabled'
+metricbeat: 'disabled'
+filebeat: 'disabled'
+waf: 'disabled'
+
+### Your cloud network subnet go here ###
+local_net: '172.31.0.0/16'
+
+### OSSEC server IP address ###
+ossec_server_ip: '172.31.0.50'
+
+### Add your IP addresses to whitelist here ###
+whitelist:
+    - 10.0.0.0/24 # Trusted networks
+    - 1.2.3.4 # Public IP of remote office
