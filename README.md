@@ -1,8 +1,9 @@
 ![alt text](https://cdn-images-1.medium.com/max/800/1*LEhyNwN6QMjflc_BtHvTMw.png "SecureStack")
 
-#Welcome to SecureStack!#
+# Welcome to SecureStack! #
 
-###Initial Installation###
+### Initial Installation ###
+
 After you've launched a SecureStack Standard instance from the AWS [Marketplace](https://ap-southeast-2.console.aws.amazon.com/ec2/v2/home?region=ap-southeast-2#LaunchInstanceWizard: "AWS Marketplace") you can ssh into the instance with the username securestack and the ssh key you provided.  SSH is initially allowed to any source IPs which you'll want to change to allow access from only your known source IPs. These known source IPs are called your 'white_list'.  
 Additionally, you'll want to limit access to the features of the SecureStack server to your AWS subnet.  Your local subnet is called your 'local_net'.
 
