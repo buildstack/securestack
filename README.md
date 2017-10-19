@@ -8,7 +8,9 @@ After you've launched a SecureStack Standard instance from the AWS [Marketplace]
 Additionally, you'll want to limit access to the features of the SecureStack server to your AWS subnet.  Your local subnet is called your 'local_net'.
 
 Once you know these values you can run the SecureStack configuration: 
-```{r, engine='bash', /opt/securestack/scripts/securestack configure}```
+```bash
+/opt/securestack/scripts/securestack configure
+```
 
 The configuration wizard will ask you to define your local_net and white_list as well as asking you if you want to enable or disable certain services.
 The services you can enable/disable are:
