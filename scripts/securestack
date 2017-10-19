@@ -148,6 +148,8 @@ start)  start
     ;;
 configure)  configure
     ;;
+update)  update
+    ;;
 status)  status $@
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
