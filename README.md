@@ -7,7 +7,9 @@
 After you've launched a SecureStack Standard instance from the AWS [Marketplace](https://ap-southeast-2.console.aws.amazon.com/ec2/v2/home?region=ap-southeast-2#LaunchInstanceWizard: "AWS Marketplace") you can ssh into the instance with the username securestack and the ssh key you provided.  SSH is initially allowed to any source IPs which you'll want to change to allow access from only your known source IPs. These known source IPs are called your 'white_list'.  
 Additionally, you'll want to limit access to the features of the SecureStack server to your AWS subnet.  Your local subnet is called your 'local_net'.
 
-Once you know these values you can run the SecureStack configuration: `/opt/securestack/scripts/securestack configure` 
+Once you know these values you can run the SecureStack configuration: 
+```{r, engine='bash', /opt/securestack/scripts/securestack configure}```
+
 The configuration wizard will ask you to define your local_net and white_list as well as asking you if you want to enable or disable certain services.
 The services you can enable/disable are:
 *fail2ban
