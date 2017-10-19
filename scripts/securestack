@@ -70,11 +70,16 @@ configure () {
 	echo "open but you won't be able to use the web UI until you define this access."
 	echo "---- Hit Ctrl-C now to exit or any key to continue -------------------"; read 
         echo "Define your whitelist ips here: "; read -a white_list
+	echo "Deleting existing firewall rules..."
+	sudo ufw reset
+	sudo ufw enable
 	for ip in ${white_list[@]}
 	do
   		sudo ufw allow proto tcp from $ip to any port 22
   		sudo ufw allow proto tcp from $ip to any port 5601
 	done
+	echo "Removing inital ssh rule..."
+	sudo ufw delete 1
 
 	while true; do
     		read -p "Do you want to enable clamav anti-virus? Default is no. [y/n] : " yn
@@ -124,6 +129,10 @@ configure () {
 
 	#echo "Do you want to enable Web Application Firewall? y/n Default is no. "; read waf_ans
 	#echo "Do you want to harden this linux operating system? y/n Default is yes. "; read harden_ans
+}
+
+update () {
+	cd /opt/securestack && git pull
 }
 
 # Variables go here #
