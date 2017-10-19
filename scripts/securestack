@@ -26,9 +26,10 @@ stop () {
 
 start () {
         sudo /var/ossec/bin/ossec-control start
+	sudo systemctl enable wazuh-manager
+	sudo systemctl start wazuh-manager
         # Daemons to manage go here #
         daemons=(
-                wazuh-manager
 		fail2ban
                 elasticsearch
                 filebeat
