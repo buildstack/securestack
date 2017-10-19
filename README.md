@@ -20,9 +20,9 @@ The services you can enable/disable are:
 *filebeat
 *metricbeat
 
-Once you've run the configuration wizard you can start the SecureStack engine: `/opt/securestack/scripts/securestack start`
+Once you've run the configuration wizard you can start the SecureStack engine: ```/opt/securestack/scripts/securestack start```
 
-In a browser you can open http://<server address>:5601 to see the SecureStack UI.  If you can't connect, verify that your AWS security groups allow access at tcp 5601.
+In a browser you can open http://server_address_here:5601 to see the SecureStack UI.  If you can't connect, verify that your AWS security groups allow access at tcp 5601.
 
 Enjoy!
 
