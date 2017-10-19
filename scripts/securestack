@@ -56,11 +56,6 @@ configure () {
 	echo "SecureStack server."
         echo "Please include all networks that will be managed by this particular instance of SecureStack."
 	echo "Enter subnets here:  "; read -a local_net
-        for subnets in ${local_net[@]}
-        do
-                sudo ufw allow proto tcp from $local_net to any port 1514
-        	sudo ufw allow proto tcp from $local_net to any port 1515 
-        done
 
 	echo "############ white_list section ######################################"
 	echo "This is where you define what IP addresses or networks you want to have administrative"
@@ -73,11 +68,19 @@ configure () {
 	echo "Deleting existing firewall rules..."
 	sudo ufw reset
 	sudo ufw enable
+
+        for subnets in ${local_net[@]}
+        do
+                sudo ufw allow proto tcp from $local_net to any port 1514
+                sudo ufw allow proto tcp from $local_net to any port 1515
+        done
+
 	for ip in ${white_list[@]}
 	do
   		sudo ufw allow proto tcp from $ip to any port 22
   		sudo ufw allow proto tcp from $ip to any port 5601
 	done
+
 	echo "Removing inital ssh rule..."
 	sudo ufw delete 1
 
