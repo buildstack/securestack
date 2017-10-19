@@ -129,6 +129,8 @@ configure () {
                 esac
         done
 
+        sudo systemctl enable wazuh-manager
+        sudo systemctl start wazuh-manager
 
 	#echo "Do you want to enable Web Application Firewall? y/n Default is no. "; read waf_ans
 	#echo "Do you want to harden this linux operating system? y/n Default is yes. "; read harden_ans
