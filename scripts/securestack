@@ -38,7 +38,7 @@ start () {
         	sudo systemctl start metricbeat && systemctl enable metricbeat
 	elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 hardened) -eq 1 ]; then
 		echo "SecureStack Role is STANDARD"
-		echo "Starting wazuh-agent..."; sudo systemctl start wazuh-agent && systemctl enable wazuh-agent
+		echo "Starting wazuh-agent..."; sudo systemctl start wazuh-agent && sudo systemctl enable wazuh-agent
 			if [ $(grep 'fail2ban:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
 				echo "Enabling fail2ban..." && sudo systemctl start fail2ban && sudo systemctl enable fail2ban
 			else echo "Disabling fail2ban..." && sudo systemctl stop fail2ban && sudo systemctl disable fail2ban
@@ -89,8 +89,8 @@ configure_networking () {
 
         for subnets in ${local_net[@]}
         do
-                sudo ufw allow proto tcp from $local_net to any port 1514
-                sudo ufw allow proto tcp from $local_net to any port 1515
+                sudo ufw allow proto tcp from $subnets to any port 1514
+                sudo ufw allow proto tcp from $subnets to any port 1515
         done
 
 	for ip in ${white_list[@]}
