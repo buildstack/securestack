@@ -68,6 +68,7 @@ start () {
 }
 
 configure_networking () {
+	echo "******************************************************************************"
 	echo "############ local_net section #######################################"
         echo "What subnets do you want to have access to this SecureStack server?"
 	echo "If you are deploying to AWS this is usually the main IPv4 CIDR block attached to your VPC"
@@ -76,6 +77,7 @@ configure_networking () {
         echo "Please include all networks that will be managed by this particular instance of SecureStack."
 	echo "Enter subnets here:  "; read -a local_net
 
+	echo "******************************************************************************"
 	echo "############ white_list section ######################################"
 	echo "This is where you define what IP addresses or networks you want to have administrative"
 	echo "access to this SecureStack server.  This access is limited to tcp 5601 for Kibana and"
@@ -84,9 +86,11 @@ configure_networking () {
 	echo "open but you won't be able to use the web UI until you define this access."
 	echo "---- Hit Ctrl-C now to exit or any key to continue -------------------"; read 
         echo "Define your whitelist ips here: "; read -a white_list
+	echo "******************************************************************************"
 	echo "Deleting existing firewall rules..."
 	sudo ufw reset
 	sudo ufw enable
+	echo "******************************************************************************"
 
         for subnets in ${local_net[@]}
         do
@@ -100,11 +104,14 @@ configure_networking () {
   		sudo ufw allow proto tcp from $ip to any port 5601
 	done
 
+	echo "******************************************************************************"
 	echo "Removing inital ssh rule..."
 	sudo ufw delete 1
+	echo "******************************************************************************"
 }
 
 configure_apps () {
+	echo "******************************************************************************"
     	read -p "Do you want to enable clamav anti-virus?  [y/N] : " clamav_ans
         read -p "Do you want to enable Linux Malware Detect (LMD/maldet)?  [y/N] : " maldet_ans
         read -p "Do you want to enable fail2ban?  [Y/n] : " fail2ban_ans
@@ -112,7 +119,7 @@ configure_apps () {
         read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans
 	#read -p "Do you want to enable Web Application Firewall? [y/N] " waf_ans
 	#read -p "Do you want to enable Rootkit Hunter? [Y/n] " rkhunter_ans
-	
+	echo "******************************************************************************"
 	# clamav section
 	case "$clamav_ans" in
     		[yY][eE][sS]|[yY]) 
@@ -167,8 +174,25 @@ configure_apps () {
 }
 
 update () {
-	cd /opt/securestack && git pull
+	sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo && sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo 2>/dev/null
+        cd /opt/securestack && git pull --quiet
+        if [ $(yum check-update --quiet |wc -l) != 0 ]; then
+	echo "******************************************************************************"
+        echo "There are $(yum check-update --quiet |wc -l) packages that need to be updated."
+                read -p "Do you want to update your operating system now? [y/n]  " updatenow
+                case "$updatenow" in
+                        [yY][eE][sS]|[yY])
+                                sudo yum update -y
+                        ;;
+                        *)
+                                echo "Not updating operating system."
+                        ;;
+                esac
+        else echo "Your operating system is up to date"
+        fi
+	echo "******************************************************************************"
 }
+
 
 # Variables go here #
 home=/opt/securestack/
@@ -182,6 +206,10 @@ stop)  stop
 start)  start
     ;;
 configure)  configure_networking; configure_apps
+    ;;
+configure_network)  configure_networking
+    ;;
+configure_apps)  configure_apps
     ;;
 update)  update
     ;;
