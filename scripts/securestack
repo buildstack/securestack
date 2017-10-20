@@ -48,6 +48,7 @@ start () {
 			else echo "Disabling clamav..." && sudo systemctl stop clamd@scan && sudo systemctl disable clamd@scan
 			fi
 			if [ $(grep 'maldet:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+				echo "Adding /mnt /media /opt/securestack to maldet monitor dirs." && sudo /usr/local/sbin/maldet --monitor /mnt /media /opt/securestack
                                 echo "Enabling Linux Malware Detect..." && sudo systemctl start maldet && sudo systemctl enable maldet
                         else echo "Disabling maldet..." && sudo systemctl stop maldet && sudo systemctl disable maldet
                         fi	
