@@ -4,11 +4,11 @@ securestack_role: "hardened"
 
 ### individual modules ###
 clamav: 'disabled'
-rkhunter: 'disabled'
 fail2ban: 'enabled'
 maldet: 'disabled'
 metricbeat: 'disabled'
 filebeat: 'disabled'
+rkhunter: 'disabled'
 waf: 'disabled'
 
 ### Your cloud network subnet go here ###
