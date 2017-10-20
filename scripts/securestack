@@ -29,13 +29,13 @@ start () {
 	if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ]; then
 		echo "SecureStack Role is SERVER"
 		echo "Starting Wazuh, Elasticsearch, Logstash, Kibana, Filebeat and Metricbeat"
-        	sudo systemctl start wazuh-manager && systemctl enable wazuh-manager
-        	sudo systemctl start wazuh-api && systemctl enable wazuh-api
-        	sudo systemctl start elasticsearch && systemctl enable elasticsearch
-        	sudo systemctl start logstash && systemctl enable logstash
-        	sudo systemctl start kibana && systemctl enable kibana 
-        	sudo systemctl start filebeat && systemctl enable filebeat
-        	sudo systemctl start metricbeat && systemctl enable metricbeat
+        	sudo systemctl start wazuh-manager && sudo systemctl enable wazuh-manager
+        	sudo systemctl start wazuh-api && sudo systemctl enable wazuh-api
+        	sudo systemctl start elasticsearch && sudo systemctl enable elasticsearch
+        	sudo systemctl start logstash && sudo systemctl enable logstash
+        	sudo systemctl start kibana && sudo systemctl enable kibana 
+        	sudo systemctl start filebeat && sudo systemctl enable filebeat
+        	sudo systemctl start metricbeat && sudo systemctl enable metricbeat
 	elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 hardened) -eq 1 ]; then
 		echo "SecureStack Role is STANDARD"
 		echo "Starting wazuh-agent..."; sudo systemctl start wazuh-agent && sudo systemctl enable wazuh-agent
