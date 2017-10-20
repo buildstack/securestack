@@ -64,31 +64,7 @@ start () {
 	fi
 }
 
-old_start () {
-        sudo /var/ossec/bin/ossec-control start
-	sudo systemctl enable wazuh-manager
-	sudo systemctl start wazuh-manager
-        # Daemons to manage go here #
-        daemons=(
-		fail2ban
-                elasticsearch
-                filebeat
-                metricbeat
-                logstash
-                kibana
-                #maldet
-                #clamd@scan
-                wazuh-api
-        )
-
-        for i in "${daemons[@]}"
-        do
-                sudo rpm -qa | grep -q $i && echo "Enabling $i" && sudo systemctl start $i && sudo systemctl enable $i
-        done
-        #rpm -qa | grep -q clamav-scanner && echo "Enabling clamd@scan" && sudo systemctl start clamd@scan && sudo systemctl enable clamd@scan
-}
-
-configure () {
+configure_networking () {
 	echo "############ local_net section #######################################"
         echo "What subnets do you want to have access to this SecureStack server?"
 	echo "If you are deploying to AWS this is usually the main IPv4 CIDR block attached to your VPC"
@@ -123,58 +99,68 @@ configure () {
 
 	echo "Removing inital ssh rule..."
 	sudo ufw delete 1
+}
 
-	while true; do
-    		read -p "Do you want to enable clamav anti-virus? Default is no. [y/n] : " yn
-    		case $yn in
-        		[Yy]* ) echo "Enabling clamav..."; sudo sed -i "s/clamav:.*/clamav: '"enabled"'/g" $home/securestack.yml; sudo systemctl start clamd@scan; sudo systemctl enable clamd@scan; break;;
-        		[Nn]* ) echo "Disabling clamav..."; sudo sed -i "s/clamav:.*/clamav: '"disabled"'/g" $home/securestack.yml; sudo systemctl stop clamd@scan; sudo systemctl disable clamd@scan; break;;
-        		* ) echo "Please answer y or n.";;
-    		esac
-	done
+configure_apps () {
+    	read -p "Do you want to enable clamav anti-virus?  [y/N] : " clamav_ans
+        read -p "Do you want to enable Linux Malware Detect (LMD/maldet)?  [y/N] : " maldet_ans
+        read -p "Do you want to enable fail2ban?  [Y/n] : " fail2ban_ans
+        read -p "Do you want to enable Metricbeat?  [y/N] : " metricbeat_ans
+        read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans
+	#read -p "Do you want to enable Web Application Firewall? [y/N] " waf_ans
+	#read -p "Do you want to enable Rootkit Hunter? [Y/n] " rkhunter_ans
+	
+	# clamav section
+	case "$clamav_av" in
+    		[yY][eE][sS]|[yY]) 
+        		sed -i "s/^clamav:.*/clamav: 'enabled'/g" /opt/securestack/securestack.yml
+        		;;
+    		*)
+        		sed -i "s/^clamav:.*/clamav: 'disabled'/g" /opt/securestack/securestack.yml
+        		;;
+	esac
+	
+	# maldet section
+        case "$maldet_ans" in
+                [yY][eE][sS]|[yY])
+                        sed -i "s/^maldet:.*/maldet: 'enabled'/g" /opt/securestack/securestack.yml
+                        ;;
+                *)
+                        sed -i "s/^maldet:.*/maldet: 'disabled'/g" /opt/securestack/securestack.yml
+                        ;;
+        esac
 
-        while true; do
-                read -p "Do you want to enable Linux Malware Detect (LMD/maldet)? Default is no. [y/n] : " yn
-                case $yn in
-                        [Yy]* ) echo "Enabling maldet..."; sudo sed -i "s/maldet:.*/maldet: '"enabled"'/g" $home/securestack.yml; sudo systemctl start maldet; sudo systemctl enable maldet; break;;
-                        [Nn]* ) echo "Disabling maldet..."; sudo sed -i "s/maldet:.*/maldet: '"disabled"'/g" $home/securestack.yml; sudo systemctl stop maldet; sudo systemctl disable maldet; break;;
-                        * ) echo "Please answer y or n.";;
-                esac
-        done
+        # fail2ban section
+        case "$fail2ban_av" in
+                [yY][eE][sS]|[yY])
+                        sed -i "s/^fail2ban:.*/fail2ban: 'enabled'/g" /opt/securestack/securestack.yml
+                        ;;
+                *)
+                        sed -i "s/^fail2ban:.*/fail2ban: 'disabled'/g" /opt/securestack/securestack.yml
+                        ;;
+        esac
 
-        while true; do
-                read -p "Do you want to enable fail2ban? Default is no. [y/n] : " yn
-                case $yn in
-                        [Yy]* ) echo "Enabling fail2ban..."; sudo sed -i "s/fail2ban:.*/fail2ban: '"enabled"'/g" $home/securestack.yml; sudo systemctl start fail2ban; sudo systemctl enable fail2ban; break;;
-                        [Nn]* ) echo "Disabling fail2ban..."; sudo sed -i "s/fail2ban:.*/fail2ban: '"disabled"'/g" $home/securestack.yml; sudo systemctl stop fail2ban; sudo systemctl disable fail2ban; break;;
-                        * ) echo "Please answer y or n.";;
-                esac
-        done
+        # metricbeat section
+        case "$metricbeat_av" in
+                [yY][eE][sS]|[yY])
+                        sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" /opt/securestack/securestack.yml
+                        ;;
+                *)
+                        sed -i "s/^metricbeat:.*/metricbeat: 'disabled'/g" /opt/securestack/securestack.yml
+                        ;;
+        esac
 
-        while true; do
-                read -p "Do you want to enable Metricbeat? Default is no. [y/n] : " yn
-                case $yn in
-                        [Yy]* ) echo "Enabling Metricbeat..."; sudo sed -i "s/metricbeat:.*/metricbeat: '"enabled"'/g" $home/securestack.yml; sudo systemctl start metricbeat; sudo systemctl enable metricbeat; break;;
-                        [Nn]* ) echo "Disabling Metricbeat..."; sudo sed -i "s/metricbeat:.*/metricbeat: '"disabled"'/g" $home/securestack.yml; sudo systemctl stop metricbeat; sudo systemctl disable metricbeat; break;;
-                        * ) echo "Please answer y or n.";;
-                esac
-        done
-
-        while true; do
-                read -p "Do you want to enable Filebeat? Default is no. [y/n] : " yn
-                case $yn in
-                        [Yy]* ) echo "Enabling Filebeat..."; sudo sed -i "s/filebeat:.*/filebeat: '"enabled"'/g" $home/securestack.yml; sudo systemctl start filebeat; sudo systemctl enable filebeat; break;;
-                        [Nn]* ) echo "Disabling Filebeat..."; sudo sed -i "s/filebeat:.*/filebeat: '"disabled"'/g" $home/securestack.yml; sudo systemctl stop filebeat; sudo systemctl disable filebeat; break;;
-                        * ) echo "Please answer y or n.";;
-                esac
-        done
-
-        sudo systemctl enable wazuh-manager
-        sudo systemctl start wazuh-manager
-	sudo rpm -qa logstash | grep -q logstash && echo "Enabling Logstash..." && sudo systemctl start logstash && sudo systemctl enable logstash
-
-	#echo "Do you want to enable Web Application Firewall? y/n Default is no. "; read waf_ans
-	#echo "Do you want to harden this linux operating system? y/n Default is yes. "; read harden_ans
+	# filebeat section
+        case "$filebeat_av" in
+                [yY][eE][sS]|[yY])
+                        sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" /opt/securestack/securestack.yml
+                        ;;
+                *)
+                        sed -i "s/^filebeat:.*/filebeat: 'disabled'/g" /opt/securestack/securestack.yml
+                        ;;
+        esac
+	
+		
 }
 
 update () {
