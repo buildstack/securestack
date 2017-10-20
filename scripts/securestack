@@ -28,40 +28,41 @@ start () {
 	if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ]; then
 		echo "SecureStack Role is SERVER"
 		echo "Starting Wazuh, Elasticsearch, Logstash, Kibana, Filebeat and Metricbeat"
-        	systemctl start wazuh-manager && systemctl enable wazuh-manager
-        	systemctl start wazuh-api && systemctl enable wazuh-api
-        	systemctl start elasticsearch && systemctl enable elasticsearch
-        	systemctl start logstash && systemctl enable logstash
-        	systemctl start kibana && systemctl enable kibana 
-        	systemctl start filebeat && systemctl enable filebeat
-        	systemctl start metricbeat && systemctl enable metricbeat
+        	sudo systemctl start wazuh-manager && systemctl enable wazuh-manager
+        	sudo systemctl start wazuh-api && systemctl enable wazuh-api
+        	sudo systemctl start elasticsearch && systemctl enable elasticsearch
+        	sudo systemctl start logstash && systemctl enable logstash
+        	sudo systemctl start kibana && systemctl enable kibana 
+        	sudo systemctl start filebeat && systemctl enable filebeat
+        	sudo systemctl start metricbeat && systemctl enable metricbeat
 	elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 hardened) -eq 1 ]; then
 		echo "SecureStack Role is STANDARD"
 			if [ $(grep 'fail2ban:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
-				echo "Enabling fail2ban..." && systemctl start fail2ban && systemctl enable fail2ban
-			else echo "Disabling fail2ban..." && systemctl stop fail2ban && systemctl disable fail2ban
+				echo "Enabling fail2ban..." && sudo systemctl start fail2ban && sudo systemctl enable fail2ban
+			else echo "Disabling fail2ban..." && sudo systemctl stop fail2ban && sudo systemctl disable fail2ban
 			fi
 			if [ $(grep 'clamav:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
-                        	echo "Enabling clamav..." && systemctl start clamd@scan && systemctl enable clamd@scan 
-			else echo "Disabling clamav..." && systemctl stop clamd@scan && systemctl disable clamd@scan
+                        	echo "Enabling clamav..." && sudo systemctl start clamd@scan && sudo systemctl enable clamd@scan 
+			else echo "Disabling clamav..." && sudo systemctl stop clamd@scan && sudo systemctl disable clamd@scan
 			fi
 			if [ $(grep 'maldet:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
-                                echo "Enabling Linux Malware Detect..." && systemctl start maldet && systemctl enable maldet
-                        else echo "Disabling maldet..." && systemctl stop maldet && systemctl disable maldet
+                                echo "Enabling Linux Malware Detect..." && sudo systemctl start maldet && sudo systemctl enable maldet
+                        else echo "Disabling maldet..." && sudo systemctl stop maldet && sudo systemctl disable maldet
                         fi	
 			if [ $(grep 'metricbeat:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
-                                echo "Enabling Metricbeat..." && systemctl start metricbeat && systemctl enable metricbeat
-                        else echo "Disabling metricbeat..." && systemctl stop metricbeat && systemctl disable metricbeat
+                                echo "Enabling Metricbeat..." && sudo systemctl start metricbeat && sudo systemctl enable metricbeat
+                        else echo "Disabling metricbeat..." && sudo systemctl stop metricbeat && sudo systemctl disable metricbeat
                         fi
 			if [ $(grep 'filebeat:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
-                                echo "Enabling Filebeat..." && systemctl start filebeat && systemctl enable filebeat
-                        else echo "Disabling Filebeat..." && systemctl stop filebeat && systemctl disable filebeat
+                                echo "Enabling Filebeat..." && sudo systemctl start filebeat && sudo systemctl enable filebeat
+                        else echo "Disabling Filebeat..." && sudo systemctl stop filebeat && sudo systemctl disable filebeat
                         fi
 		
 	elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 naked) -eq 1 ]; then
         	echo "SecureStack Role is NAKED"
         	echo "Not doing anything."
 	fi
+}
 
 old_start () {
         sudo /var/ossec/bin/ossec-control start
