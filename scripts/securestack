@@ -111,7 +111,7 @@ configure_apps () {
 	#read -p "Do you want to enable Rootkit Hunter? [Y/n] " rkhunter_ans
 	
 	# clamav section
-	case "$clamav_av" in
+	case "$clamav_ans" in
     		[yY][eE][sS]|[yY]) 
         		sed -i "s/^clamav:.*/clamav: 'enabled'/g" /opt/securestack/securestack.yml
         		;;
@@ -131,7 +131,7 @@ configure_apps () {
         esac
 
         # fail2ban section
-        case "$fail2ban_av" in
+        case "$fail2ban_ans" in
                 [yY][eE][sS]|[yY])
                         sed -i "s/^fail2ban:.*/fail2ban: 'enabled'/g" /opt/securestack/securestack.yml
                         ;;
@@ -141,7 +141,7 @@ configure_apps () {
         esac
 
         # metricbeat section
-        case "$metricbeat_av" in
+        case "$metricbeat_ans" in
                 [yY][eE][sS]|[yY])
                         sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" /opt/securestack/securestack.yml
                         ;;
@@ -151,7 +151,7 @@ configure_apps () {
         esac
 
 	# filebeat section
-        case "$filebeat_av" in
+        case "$filebeat_ans" in
                 [yY][eE][sS]|[yY])
                         sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" /opt/securestack/securestack.yml
                         ;;
@@ -178,7 +178,7 @@ stop)  stop
     ;;
 start)  start
     ;;
-configure)  configure
+configure)  configure_networking; configure_apps
     ;;
 update)  update
     ;;

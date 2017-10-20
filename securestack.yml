@@ -4,9 +4,9 @@ securestack_role: "hardened"
 
 ### individual modules ###
 clamav: 'disabled'
-rootkit_hunter: 'disabled'
+rkhunter: 'disabled'
 fail2ban: 'enabled'
-malware_detect: 'disabled'
+maldet: 'disabled'
 metricbeat: 'disabled'
 filebeat: 'disabled'
 waf: 'disabled'
