@@ -80,7 +80,7 @@ configure_networking () {
 	echo "******************************************************************************"
 	echo "############ white_list section ######################################"
 	echo "This is where you define what IP addresses or networks you want to have administrative"
-	echo "access to this SecureStack server.  This access is limited to tcp 5601 for Kibana and"
+	echo "access to this SecureStack server.  This access is limited to http for nginx and"
 	echo "tcp 22 for ssh.  Please be careful as you can lock yourself out of your server if you"
 	echo "enter the wrong values here.  You can cancel by hitting Ctrl-C now which will leave ssh"
 	echo "open but you won't be able to use the web UI until you define this access."
@@ -101,7 +101,7 @@ configure_networking () {
 	for ip in ${white_list[@]}
 	do
   		sudo ufw allow proto tcp from $ip to any port 22
-  		sudo ufw allow proto tcp from $ip to any port 5601
+  		sudo ufw allow proto tcp from $ip to any port 80
 	done
 
 	echo "******************************************************************************"
