@@ -15,6 +15,7 @@ stop () {
 		elasticsearch
 		maldet
                 clamd@scan
+		nginx
                 wazuh-api
 	)
 
@@ -31,6 +32,7 @@ start () {
 		echo "Starting Wazuh, Elasticsearch, Logstash, Kibana, Filebeat and Metricbeat"
         	sudo systemctl start wazuh-manager && sudo systemctl enable wazuh-manager
         	sudo systemctl start wazuh-api && sudo systemctl enable wazuh-api
+        	sudo systemctl start nginx && sudo systemctl enable nginx
         	sudo systemctl start elasticsearch && sudo systemctl enable elasticsearch
         	sudo systemctl start logstash && sudo systemctl enable logstash
         	sudo systemctl start kibana && sudo systemctl enable kibana 
@@ -88,8 +90,8 @@ configure_networking () {
         echo "Define your whitelist ips here: "; read -a white_list
 	echo "******************************************************************************"
 	echo "Deleting existing firewall rules..."
-	sudo ufw reset
-	sudo ufw enable
+	sudo ufw --force reset
+	sudo ufw --force enable
 	echo "******************************************************************************"
 
         for subnets in ${local_net[@]}
@@ -106,7 +108,7 @@ configure_networking () {
 
 	echo "******************************************************************************"
 	echo "Removing inital ssh rule..."
-	sudo ufw delete 1
+	sudo ufw --force delete 1
 	echo "******************************************************************************"
 }
 
@@ -174,6 +176,7 @@ configure_apps () {
 }
 
 update () {
+	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
 	sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo && sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo 2>/dev/null
         cd /opt/securestack && git pull --quiet
         if [ $(yum check-update --quiet |wc -l) != 0 ]; then
@@ -190,7 +193,7 @@ update () {
                 esac
         else echo "Your operating system is up to date"
         fi
-	echo "******************************************************************************"
+	echo "                                       "
 }
 
 
