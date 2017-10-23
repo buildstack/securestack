@@ -11,22 +11,23 @@ SecureStack Server is your central management system that ties all your Base mac
 
 ### SecureStack Components ###
 All versions of SecureStack come with:
-*Intrusion detection and prevention
-*Anti-virus
-*Anti-malware
-*Rootkit detection
-*File integrity monitoring
-*DDoS protection
-*System auditing
-*Hardened Linux operating system
+
+* Intrusion detection and prevention
+* Anti-virus
+* Anti-malware
+* Rootkit detection
+* File integrity monitoring
+* DDoS protection
+* System auditing
+* Hardened Linux operating system
 
 SecureStack Server also has:
-*Security information and event management (SIEM)
-*Cloud auditing
-*Compliance reports
-*Visualizations and dashboards
-*Event correlation and reports
-*System monitoring (cpu, disk, io, network, etc)
+* Security information and event management (SIEM)
+* Cloud auditing
+* Compliance reports
+* Visualizations and dashboards
+* Event correlation and reports
+* System monitoring (cpu, disk, io, network, etc)
 
 ### Initial Installation ###
 
@@ -49,13 +50,13 @@ Once you know these values you can run the SecureStack configuration:
 
 The configuration wizard will ask you to define your local_net and white_list as well as asking you if you want to enable or disable certain services.
 The services you can enable/disable are:
-*fail2ban
-*ClamAV
-*Linux Malware Detect
-*Filebeat
-*Metricbeat
-*SCAP auditing tool
-*Lynis system auditing
+* fail2ban
+* ClamAV
+* Linux Malware Detect
+* Filebeat
+* Metricbeat
+* SCAP auditing tool
+* Lynis system auditing
 
 All configuration is contained in the /opt/securestack/securestack.yml file.  You can edit this file rather than running the configuration script.
 
