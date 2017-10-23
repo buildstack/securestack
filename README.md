@@ -3,9 +3,30 @@
 # Welcome to SecureStack! #
 SecureStack is a drop in security layer for all your IT infrastructure.  Think of us as a "Platform-Security-as-a-Service".  SecureStack comes in two forms:  SecureStack Base and SecureStack Server.  You can find both products here in the AWS [Marketplace](https://aws.amazon.com/marketplace/seller-profile?id=040c3d94-af50-430e-85a0-03719a4f9fad "AWS Marketplace")
 
-SecureStack Base is intended to be the AMI you use to build all of your AWS infrastructure.  So, if in the past you've used a Linux image from the AWS Marketplace, or a custom image you've built yourself you can replace it with our [SecureStack Base AMI](https://aws.amazon.com/marketplace/pp/B076JG5BHM/?ref=_ptnr_web_gh_readme_us "SecureStack Base AMI").  SecureStack Base is a hardened Linux operating system.  Additionally, it comes with many security tools baked right in.  Some of these tools are: IDS/IPS, anti-virus, anti-malware, rootkit detection, DDoS protection, system auditing, system monitoring, file integrity monitoring and more.  SecureStack Base also has auditing built in that you can use to test your level of compliance.  SecureStack currently has modules for: PCI-DSS, OWASP, SCAP, and CIS.   
+SecureStack Base is intended to be the AMI you use to build all of your AWS infrastructure.  So, if in the past you've used a Linux image from the AWS Marketplace, or a custom image you've built yourself you can replace it with our [SecureStack Base AMI](https://aws.amazon.com/marketplace/pp/B076JG5BHM/?ref=_ptnr_web_gh_readme_us "SecureStack Base AMI").  SecureStack Base is a hardened Linux operating system.  Additionally, it comes with many security tools baked right in.  
 
-SecureStack Server is your central management system that ties all your Base machines together.  SecureStack Server is a log collection, aggregation and analysis solution.  It's also a complete SIEM solution with real-time dashboards, custom visualizations and dashboards, event correlation, history and backup.  SecureStack Base instances talk to a SecureStack Server instance via an encrypted connection.  Events are passed in real-time so if an instance is compromised a hacker can't edit their history and make it disappear.  SecureStack Server already has the message and has alerted you to their presence.  SecureStack Server supports active response too.  If it sees an attack it can mitigate it with an automated response.  
+SecureStack currently has modules for: PCI-DSS, OWASP, SCAP, and CIS.   
+
+SecureStack Server is your central management system that ties all your Base machines together.  SecureStack Server is a log collection, aggregation and analysis solution.  It's also a complete SIEM solution with real-time dashboards, custom visualizations and dashboards, event correlation, history and backup.  SecureStack Base instances talk to a SecureStack Server instance via an encrypted connection.  Events are passed in real-time so if an instance is compromised a hacker can't edit their history and make it disappear.  SecureStack Server already has the message and has alerted you to their presence.  SecureStack Server supports active response too.  If it sees an attack it can mitigate it with an automated response.  SecureStack Server also supports scheduled compliance checks.  Currently there are modules for: PCI-DSS, OWASP, SCAP, and CIS.   
+
+### SecureStack Components ###
+All versions of SecureStack come with:
+*Intrusion detection and prevention
+*Anti-virus
+*Anti-malware
+*Rootkit detection
+*File integrity monitoring
+*DDoS protection
+*System auditing
+*Hardened Linux operating system
+
+SecureStack Server also has:
+*Security information and event management (SIEM)
+*Cloud auditing
+*Compliance reports
+*Visualizations and dashboards
+*Event correlation and reports
+*System monitoring (cpu, disk, io, network, etc)
 
 ### Initial Installation ###
 
