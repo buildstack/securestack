@@ -121,14 +121,14 @@ configure_networking () {
 	echo "******************************************************************************"
 }
 
-password_gen() {
+newuser () {
 	read -p "Do you want to create a new user for the web ui? [y/N] : " nginx_create
         case "$nginx_create" in
                 [yY][eE][sS]|[yY])
-                        read -p "What is the new username? " nginx_user
-                        echo "Enter the new password? " read -s nginx_pass
-			htpasswd -c /etc/nginx/htpasswd.users $nginx_user $nginx_pass
-			unset nginx_pass
+			read -p "What is the new username? " nginx_user
+                        echo "Enter the new password? "; read -s nginx_pass
+                        htpasswd -c /etc/nginx/htpasswd.users $nginx_user $nginx_pass || echo "No htpasswd found.  This command only works on Server instances"
+                        unset nginx_pass
                         ;;
                 *)
                         echo "Cancelling new user creation."
@@ -240,7 +240,7 @@ configure_network)  configure_networking
     ;;
 configure_apps)  configure_apps
     ;;
-newuser)  password_gen
+newuser) newuser 
     ;;
 update)  update
     ;;
