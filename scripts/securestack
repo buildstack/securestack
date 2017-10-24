@@ -239,6 +239,8 @@ configure_network)  configure_networking
     ;;
 configure_apps)  configure_apps
     ;;
+newuser)  password_gen
+    ;;
 update)  update
     ;;
 status)  status $@
