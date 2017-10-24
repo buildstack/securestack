@@ -19,11 +19,14 @@ All versions of SecureStack come with:
 * File integrity monitoring
 * DDoS protection
 * System auditing
+* Web Application Firewall (WAF)
 * Hardened Linux operating system
 
 SecureStack Server also has:
 * Security information and event management (SIEM)
 * Cloud auditing
+* Distributed firewall
+* Security vulnerability scanning
 * Compliance reports
 * Visualizations and dashboards
 * Event correlation and reports
