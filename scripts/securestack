@@ -126,8 +126,9 @@ password_gen() {
         case "$nginx_create" in
                 [yY][eE][sS]|[yY])
                         read -p "What is the new username? " nginx_user
-                        read -p -s "Enter the new password? " nginx_pass
+                        echo "Enter the new password? " read -s nginx_pass
 			htpasswd -c /etc/nginx/htpasswd.users $nginx_user $nginx_pass
+			unset nginx_pass
                         ;;
                 *)
                         echo "Cancelling new user creation."
