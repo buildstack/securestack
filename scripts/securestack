@@ -69,6 +69,8 @@ start () {
 	fi
 	
 	# Get IP information
+	echo " "
+	echo "============================================================================================================================================"
 	echo "As a general rule we suggest that you don't allow access to the Web UI from the internet at all.  But, in the absence of a VPN or some other"
 	echo "way to connect using the local IP address you will need to create a Security Group in AWS that allows access to HTTP (tcp 80) from your IP"
 	echo "address.  You will need to do this before you can connect successfully.  During the configuration you should have created a white_list of"
