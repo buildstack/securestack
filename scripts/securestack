@@ -230,6 +230,7 @@ configure_apps () {
 
 update () {
 	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
+	if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then sudo git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
 	sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo && sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo 2>/dev/null
         cd /opt/securestack && git pull --quiet
         if [ $(yum check-update --quiet |wc -l) != 0 ]; then
@@ -252,6 +253,15 @@ update () {
 
 # Variables go here #
 sshome=/opt/securestack/
+# Find securestack_role from securstack.yml file
+if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ];
+        then role='server';
+elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 hardened) -eq 1 ];
+        then role='hardened';
+elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 naked) -eq 1 ];
+        then role='naked';
+else role='hardened';
+fi
 
 case "$1" in
 
@@ -261,7 +271,7 @@ stop)  stop
     ;;
 start)  start
     ;;
-configure)  if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ]; then configure_networking_server; else configure_networking_base;fi; configure_apps
+configure)  if [ $role = 'server ]; then configure_networking_server; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps
     ;;
 configure_network)  if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ]; then configure_networking_server; else configure_networking_base;fi
     ;;
