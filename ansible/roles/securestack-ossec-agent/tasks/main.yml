@@ -1,3 +1,5 @@
+### This role works for brand new instances with no OSSEC or Wazuh installs.  It also works for existing SecureStack Base instances.  ###
+
 ---
 - name: Copy default wazuh repo file
   copy:
