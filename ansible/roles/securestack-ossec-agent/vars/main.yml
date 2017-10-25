@@ -1,0 +1,6 @@
+---
+required_vars:
+# - local_net
+  - ossec_server_ip
+  - authd_password
+

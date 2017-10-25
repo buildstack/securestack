@@ -1,0 +1,43 @@
+---
+- name: Copy default wazuh repo file
+  copy:
+    src: wazuh.repo
+    dest: /etc/yum.repos.d/
+
+- name: Install wazuh ossec agent
+  action: yum pkg=wazuh-agent state=latest
+
+- name: Copy ossec.conf template
+  template:
+    src: "{{ role_path }}/templates/ossec.j2"
+    dest: /var/ossec/etc/ossec.conf
+    owner: root
+    group: ossec
+    mode: 0640
+
+- stat: path=/var/ossec/etc/authd.pass
+  register: authd_pass_exist
+
+- file:
+    dest: '/var/ossec/etc/authd.pass'
+    state: absent
+
+- file:
+    dest: '/var/ossec/etc/authd.pass'
+    state: touch
+
+- lineinfile:
+    path: /var/ossec/etc/authd.pass
+    line: "{{ authd_password }}"
+
+- name: Authenticate to server
+  command: "/var/ossec/bin/agent-auth -m {{ ossec_server_ip }}"
+  ignore_errors: true
+  register: ossec_agent_auth_success
+
+- name: Restart ossec
+  command: /var/ossec/bin/ossec-control restart
+  when: ossec_agent_auth_success 
+# when:  "'Could not connect' in ossec_agent_auth_success"
+
+

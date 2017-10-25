@@ -1,0 +1,11 @@
+image: 'ami-a0c817da'
+count: 1
+vpc_subnet_id: 'subnet-731b5449'
+region: 'us-east-1'
+group_id: 'sg-5d41e02f'
+remote_user: 'securestack'
+securestack_role: 'standard'
+authd_password: 'Ld1L8v8EcNAMDsePHeuYVjgzGfVaaLK1UnGHA7uS1cNKNyuPCRbjhnA8v9bXDiFR'
+local_net: '172.31.0.0/16'
+instance_type: t2.micro
+key_name: kryptonite

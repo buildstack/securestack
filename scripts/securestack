@@ -140,7 +140,6 @@ configure_networking_base () {
         for ip in ${white_list[@]}
         do
                 sudo ufw allow proto tcp from $ip to any port 22
-                sudo ufw allow proto tcp from $ip to any port 80
         done
 
         echo "******************************************************************************"
