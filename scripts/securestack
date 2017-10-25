@@ -127,7 +127,7 @@ newuser () {
                 [yY][eE][sS]|[yY])
 			read -p "What is the new username? " nginx_user
                         echo "Enter the new password? "; read -s nginx_pass
-                        htpasswd -c /etc/nginx/htpasswd.users $nginx_user $nginx_pass || echo "No htpasswd found.  This command only works on Server instances"
+                        sudo htpasswd -c /etc/nginx/htpasswd.users $nginx_user $nginx_pass || echo "No htpasswd found.  This command only works on Server instances"
                         unset nginx_pass
                         ;;
                 *)
