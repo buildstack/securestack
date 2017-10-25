@@ -143,7 +143,7 @@ configure_networking_base () {
         echo "******************************************************************************"
 }
 
-newuser () {
+create_user () {
 	read -p "Do you want to create a new user for the web ui? [y/N] : " nginx_create
         case "$nginx_create" in
                 [yY][eE][sS]|[yY])
@@ -267,13 +267,13 @@ stop)  stop
     ;;
 start)  start
     ;;
-configure)  if [ $role = 'server' ]; then configure_networking_server; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps
+configure)  if [ $role = 'server' ]; then configure_networking_server; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps; create_user
     ;;
 configure_network)  if [ $role = 'server' ]; then configure_networking_server; else configure_networking_base;fi
     ;;
 configure_apps)  configure_apps
     ;;
-newuser) newuser 
+create_user) create_user
     ;;
 update)  update
     ;;
