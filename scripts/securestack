@@ -176,7 +176,7 @@ configure_apps () {
         read -p "Do you want to enable Linux Malware Detect (LMD/maldet)?  [y/N] : " maldet_ans
         read -p "Do you want to enable fail2ban?  [Y/n] : " fail2ban_ans
         if [ $role != 'server' ]; then read -p "Do you want to enable Metricbeat?  [y/N] : " metricbeat_ans; fi
-        if [ $role != 'server' ]; read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans; fi
+        if [ $role != 'server' ]; then read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans; fi
 	#read -p "Do you want to enable Web Application Firewall? [y/N] " waf_ans
 	#read -p "Do you want to enable Rootkit Hunter? [Y/n] " rkhunter_ans
 	echo "******************************************************************************"
