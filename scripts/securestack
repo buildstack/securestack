@@ -230,7 +230,8 @@ configure_apps () {
 
 update () {
 	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
-	if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then sudo git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
+	if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
+	if [ $role = 'server' ]; then echo 'source /opt/securestack/bin/ansible/hacking/env-setup' >> /opt/securestack/.bash_profile
 	sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo && sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo 2>/dev/null
         cd /opt/securestack && git pull --quiet
         if [ $(yum check-update --quiet |wc -l) != 0 ]; then
