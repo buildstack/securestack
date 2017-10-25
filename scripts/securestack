@@ -71,7 +71,7 @@ start () {
 	# Get IP information
 	echo "You should now be able to connect to SecureStack Server.  Best practice is to NOT allow http to the internet."
 	echo "In which case you would connect to this server at http://$(ifconfig eth0|grep inet|awk '{print $2}')"
-	echo "If for whatever reason you have allowed http access from the internet (WHICH WE DON'T SUGGEST YOU DO)"
+	echo "If for whatever reason you have allowed http access from the internet (WHICH WE DO NOT SUGGEST YOU DO)"
 	echo "You can connect to this server at http://$(curl icanhazip)"
 	echo "Your internal IP address is = $(ifconfig eth0|grep inet|awk '{print $2}')"
 	echo "Your public IP address is = $(curl icanhazip)"
@@ -271,9 +271,9 @@ stop)  stop
     ;;
 start)  start
     ;;
-configure)  if [ $role = 'server ]; then configure_networking_server; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps
+configure)  if [ $role = 'server' ]; then configure_networking_server; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps
     ;;
-configure_network)  if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ]; then configure_networking_server; else configure_networking_base;fi
+configure_network)  if [ $role = 'server' ]; then configure_networking_server; else configure_networking_base;fi
     ;;
 configure_apps)  configure_apps
     ;;
