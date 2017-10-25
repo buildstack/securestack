@@ -175,8 +175,8 @@ configure_apps () {
     	read -p "Do you want to enable clamav anti-virus?  [y/N] : " clamav_ans
         read -p "Do you want to enable Linux Malware Detect (LMD/maldet)?  [y/N] : " maldet_ans
         read -p "Do you want to enable fail2ban?  [Y/n] : " fail2ban_ans
-        read -p "Do you want to enable Metricbeat?  [y/N] : " metricbeat_ans
-        read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans
+        if [ $role != 'server' ]; then read -p "Do you want to enable Metricbeat?  [y/N] : " metricbeat_ans; fi
+        if [ $role != 'server' ]; read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans; fi
 	#read -p "Do you want to enable Web Application Firewall? [y/N] " waf_ans
 	#read -p "Do you want to enable Rootkit Hunter? [Y/n] " rkhunter_ans
 	echo "******************************************************************************"
@@ -229,6 +229,9 @@ configure_apps () {
                         sed -i "s/^filebeat:.*/filebeat: 'disabled'/g" /opt/securestack/securestack.yml
                         ;;
         esac
+	
+	if [ $role = 'server' ]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" /opt/securestack/securestack.yml; fi
+	if [ $role = 'server' ]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" /opt/securestack/securestack.yml; fi
 	
 		
 }
@@ -290,7 +293,7 @@ update)  update
 status)  status $@
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|role)    "
+    echo "Usage: securestack (configure|stop|start|configure_network|configure_apps|create_user|update)    "
     echo " "
     exit 1
    ;;
