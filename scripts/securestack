@@ -69,8 +69,16 @@ start () {
 	fi
 	
 	# Get IP information
-	echo "If you've allowed http access to the internet you can login at http://$(curl -s icanhazip.com)"
-	echo "Otherwise you can login here http://$(ifconfig eth0|grep inet|awk '{print $2}')"
+	echo "As a general rule we suggest that you don't allow access to the Web UI from the internet at all.  But, in the absence of a VPN or some other"
+	echo "way to connect using the local IP address you will need to create a Security Group in AWS that allows access to HTTP (tcp 80) from your IP"
+	echo "address.  You will need to do this before you can connect successfully.  During the configuration you should have created a white_list of"
+	echo "known good IP source addresses.  Any addresses on the white_list were given access to HTTP (tcp 80)."
+	echo "============================================================================================================================================"
+	echo " "
+	echo "If you've allowed http access to the internet you can login to the SecureStack Web UI at http://$(curl -s icanhazip.com)"
+	echo "Otherwise you can login to the SecureStack Web UI at http://$(ifconfig eth0|grep inet|awk '{print $2}')"
+	echo " "
+	echo "============================================================================================================================================"
 }
 
 configure_networking_server () {
