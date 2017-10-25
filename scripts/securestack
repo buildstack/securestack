@@ -78,7 +78,7 @@ start () {
 	echo "Username is securestack and password is ?? "
 }
 
-configure_networking () {
+configure_networking_server () {
 	echo "******************************************************************************"
 	echo "############ local_net section #######################################"
         echo "What subnets do you want to have access to this SecureStack server?"
@@ -121,13 +121,41 @@ configure_networking () {
 	echo "******************************************************************************"
 }
 
+configure_networking_base () {
+        echo "******************************************************************************"
+        echo "############ white_list section ######################################"
+        echo "This is where you define what IP addresses or networks you want to have administrative"
+        echo "access to this SecureStack server.  This access is limited to"
+        echo "tcp 22 for ssh.  Please be careful as you can lock yourself out of your server if you"
+        echo "enter the wrong values here.  You can cancel by hitting Ctrl-C now which will leave ssh"
+        echo "open but you won't be able to use the web UI until you define this access."
+        echo "---- Hit Ctrl-C now to exit or any key to continue -------------------"; read
+        echo "Define your whitelist ips here: "; read -a white_list
+        echo "******************************************************************************"
+        echo "Deleting existing firewall rules..."
+        sudo ufw --force reset
+        sudo ufw --force enable
+        echo "******************************************************************************"
+
+        for ip in ${white_list[@]}
+        do
+                sudo ufw allow proto tcp from $ip to any port 22
+                sudo ufw allow proto tcp from $ip to any port 80
+        done
+
+        echo "******************************************************************************"
+        echo "Removing inital ssh rule..."
+        sudo ufw --force delete 1
+        echo "******************************************************************************"
+}
+
 newuser () {
 	read -p "Do you want to create a new user for the web ui? [y/N] : " nginx_create
         case "$nginx_create" in
                 [yY][eE][sS]|[yY])
 			read -p "What is the new username? " nginx_user
                         echo "Enter the new password? "; read -s nginx_pass
-                        sudo htpasswd -c /etc/nginx/htpasswd.users $nginx_user $nginx_pass || echo "No htpasswd found.  This command only works on Server instances"
+                        sudo htpasswd -cb /etc/nginx/htpasswd.users $nginx_user $nginx_pass || echo "No htpasswd found.  This command only works on Server instances"
                         unset nginx_pass
                         ;;
                 *)
@@ -236,7 +264,7 @@ start)  start
     ;;
 configure)  configure_networking; configure_apps
     ;;
-configure_network)  configure_networking
+configure_network)  if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ]; then configure_networking_server; else configure_networking_base;fi
     ;;
 configure_apps)  configure_apps
     ;;
