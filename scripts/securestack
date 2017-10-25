@@ -262,7 +262,7 @@ stop)  stop
     ;;
 start)  start
     ;;
-configure)  configure_networking; configure_apps
+configure)  if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ]; then configure_networking_server; else configure_networking_base;fi; configure_apps
     ;;
 configure_network)  if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ]; then configure_networking_server; else configure_networking_base;fi
     ;;
