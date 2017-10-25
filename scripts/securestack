@@ -69,12 +69,13 @@ start () {
 	fi
 	
 	# Get IP information
+	public_ip=$(curl icanhazip.com)
 	echo "You should now be able to connect to SecureStack Server.  Best practice is to NOT allow http to the internet."
 	echo "In which case you would connect to this server at http://$(ifconfig eth0|grep inet|awk '{print $2}')"
 	echo "If for whatever reason you have allowed http access from the internet (WHICH WE DO NOT SUGGEST YOU DO)"
-	echo "You can connect to this server at http://$(curl icanhazip)"
+	echo "You can connect to this server at http://<ip address>"
 	echo "Your internal IP address is = $(ifconfig eth0|grep inet|awk '{print $2}')"
-	echo "Your public IP address is = $(curl icanhazip)"
+	echo "Your public IP address is = public_ip"
 	echo "Username is securestack and password is ?? "
 }
 
