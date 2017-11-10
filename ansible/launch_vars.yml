@@ -9,3 +9,5 @@ authd_password: 'Ld1L8v8EcNAMDsePHeuYVjgzGfVaaLK1UnGHA7uS1cNKNyuPCRbjhnA8v9bXDiF
 local_net: '172.31.0.0/16'
 instance_type: t2.micro
 key_name: kryptonite
+ossec_server_ip: '172.31.14.125'
+
