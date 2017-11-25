@@ -53,5 +53,10 @@
   vars_files:
     - launch_vars.yml
 
+  pre_tasks:
+    - name: Change hostname
+      hostname:
+        name: "{{ hostname }}"
+
   roles:
     - { role: 'securestack-ossec-agent', gather_facts: True, become: True, when: securestack_role != 'server' }
