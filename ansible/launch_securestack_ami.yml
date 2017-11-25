@@ -58,5 +58,11 @@
       hostname:
         name: "{{ hostname }}"
 
+    - name: Yum updates
+      yum:
+        name: '*'
+        repolist: base,epel,extras,updates
+        state: latest
+
   roles:
     - { role: 'securestack-ossec-agent', gather_facts: True, become: True, when: securestack_role != 'server' }
