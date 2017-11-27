@@ -1,12 +1,19 @@
+# These values never change #
 image: 'ami-57e10f35'
-count: 1
-vpc_subnet_id: ''
-region: 'us-east-1'
-group_id: ''
 remote_user: 'securestack'
 securestack_role: 'standard'
+
+# These are always specific to your environment #
+aws_access_key:
+aws_secret_key:
+vpc_subnet_id: ''
+group_id: ''
+ossec_server_ip: '172.31.14.125'
+
+# You can use these as defaults or change as needed #
+count: 1
+region: 'us-east-1'
 authd_password: 'Ld1L8v8EcNAMDsePHeuYVjgzGfVaaLK1UnGHA7uS1cNKNyuPCRbjhnA8v9bXDiFR'
 local_net: '172.31.0.0/16'
 instance_type: t2.micro
 key_name: kryptonite
-ossec_server_ip: '172.31.14.125'
