@@ -27,7 +27,7 @@
          instance_tags:
            Name: "{{ hostname }}"
            securestack_managed: yes
-         assign_public_ip: yes
+         assign_public_ip: no
       register: ec2
 
     - name: Add new instance to host group
