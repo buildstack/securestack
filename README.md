@@ -46,7 +46,28 @@ This command updates the CentOS operating system so occasionally you will have t
 
 #### AWS: S3, and IAM ####
 
-If you are going to run SecureStack workloads in AWS there are a couple things you can do to optimize your configuration.  These steps are not strictly necessary, but will help to make your environment both more efficient as well as more secure.  First, you will want to create an IAM role called "securestack-ec2-allow-S3".  
+If you are going to run SecureStack workloads in AWS there are a couple things you can do to optimize your configuration.  These steps are not strictly necessary, but will help to make your environment both more efficient as well as more secure.  First, you will want to create an IAM role called "securestack-ec2-allow-S3".  Copy this into your policy:
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+         "ec2:RunInstances",
+         "ec2:AssociateIamInstanceProfile",
+         "ec2:ReplaceIamInstanceProfileAssociation"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "*"
+    }
+  ]
+}
+```
 
 #### Configuration ####
 
