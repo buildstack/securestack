@@ -236,6 +236,10 @@ configure_apps () {
 		
 }
 
+provision() {
+	ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "local_net=$local_net ossec_server_ip=$server_ip authd_password=$authd_pass hostname=$hostname"
+}
+
 update () {
 	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
 	if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
@@ -287,6 +291,8 @@ configure_network)  if [ $role = 'server' ]; then configure_networking_server; e
 configure_apps)  configure_apps
     ;;
 create_user) create_user
+    ;;
+provision) provision
     ;;
 update)  update
     ;;
