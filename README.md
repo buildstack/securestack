@@ -71,9 +71,10 @@ If you are going to run SecureStack workloads in AWS there are a couple things y
 
 #### AWS AMIs ####
 
-**Region Name			Region			AMI**
-US East (N. Virginia)		us-east-1		ami-3a13ba40
-US East (Ohio)			us-east-2		ami-a03f10c5
+**Region Name** | **Region** |  **AMI**
+--- | --- | ---
+US East (N. Virginia) | us-east-1 | ami-3a13ba40
+US East (Ohio) | us-east-2 | ami-a03f10c5
 US West (N. California)		us-west-1		ami-d4625db4
 US West (Oregon)		us-west-2		ami-00ab6078
 Asia Pacific (Mumbai)		ap-south-1		ami-ebade084
