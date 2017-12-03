@@ -69,6 +69,25 @@ If you are going to run SecureStack workloads in AWS there are a couple things y
 }
 ```
 
+#### AWS AMIs ####
+
+**Region Name			Region			AMI**
+US East (N. Virginia)		us-east-1		ami-3a13ba40
+US East (Ohio)			us-east-2		ami-a03f10c5
+US West (N. California)		us-west-1		ami-d4625db4
+US West (Oregon)		us-west-2		ami-00ab6078
+Asia Pacific (Mumbai)		ap-south-1		ami-ebade084
+Asia Pacific (Seoul)		ap-northeast-2		ami-05a5016b
+Asia Pacific (Singapore)	ap-southeast-1		ami-be420fdd
+Asia Pacific (Sydney)		ap-southeast-2		ami-57e10f35
+Asia Pacific (Tokyo)		ap-northeast-1		ami-45ac0023
+Canada (Central)		ca-central-1		ami-4f55ed2b
+EU (Frankfurt)			eu-central-1		ami-ff55d090
+EU (Ireland)			eu-west-1		ami-9f8928e6
+EU (London)			eu-west-2		ami-6c6f7308
+South America (São Paulo)	sa-east-1		ami-f7cbb39b
+US GovCloud			us-gov-west-1		ami-7e14991f
+
 #### Configuration ####
 
 SSH is initially allowed to any source IPs which you'll want to change to allow access from only your known source IPs. These known source IPs are called your 'white_list'.  

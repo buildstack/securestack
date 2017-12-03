@@ -237,7 +237,20 @@ configure_apps () {
 }
 
 provision() {
-	ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "local_net=$local_net ossec_server_ip=$server_ip authd_password=$authd_pass hostname=$hostname"
+	timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+	case "$2" in
+                [iI][nN][tT]|[iI])
+                        read -p "Hostname?  " hostname_ans
+                        read -p "Local Network?  " local_net_ans
+                        read -p "SecureStack Server IP Address?  " server_ip_ans
+                        read -p "authd password?  " authd_pass_ans
+                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "local_net=$local_net_ans ossec_server_ip=$server_ip_ans authd_password=$authd_pass_ans hostname=$hostname_ans"
+                        ;;
+                *)
+                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "hostname=securestack-base-$timestamp"
+                        ;;
+        esac
+
 }
 
 update () {
