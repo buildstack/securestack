@@ -61,7 +61,7 @@
     - name: Yum updates
       yum:
         name: '*'
-        repolist: base,epel,extras,updates
+        enablerepo: base,epel,extras,updates
         state: latest
 
     - name: Run securestack update script
