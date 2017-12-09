@@ -244,14 +244,29 @@ provision() {
                         read -p "Local Network?  " local_net_ans
                         read -p "SecureStack Server IP Address?  " server_ip_ans
                         read -p "authd password?  " authd_pass_ans
-                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "local_net=$local_net_ans ossec_server_ip=$server_ip_ans authd_password=$authd_pass_ans hostname=$hostname_ans"
+                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False local_net=$local_net_ans ossec_server_ip=$server_ip_ans authd_password=$authd_pass_ans hostname=$hostname_ans"
                         ;;
                 *)
-                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "hostname=securestack-base-$timestamp"
+                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=securestack-base-$timestamp"
                         ;;
         esac
 
 }
+
+mfa() {
+	read -p "Do you want to install Kryptonite Multi Factor Authentication?  " krypt_ans	
+	case "$krypt_ans" in
+            [yY][eE][sS]|[yY])
+                gpg --keyserver=hkp://pgp.mit.edu:80 --recv-keys "C4A05888A1C4FA02E1566F859F2A29A569653940"
+		gpg --export --armor C4A05888A1C4FA02E1566F859F2A29A569653940 > /tmp/kryptco.key
+		sudo rpm --import /tmp/kryptco.key
+		sudo yum-config-manager --add-repo https://kryptco.github.io/yum
+		sudo rm -rf /tmp/kryptco.key
+		sudo yum install kr -y
+            *)
+                echo "Cancelling new MFA creation."
+                ;;
+        esac
 
 update () {
 	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
@@ -306,6 +321,8 @@ configure_apps)  configure_apps
 create_user) create_user
     ;;
 provision) provision
+    ;;
+mfa) mfa
     ;;
 update)  update
     ;;
