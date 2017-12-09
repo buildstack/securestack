@@ -244,11 +244,25 @@ provision() {
                         read -p "AWS secret key?  " aws_secret_key_ans
                         read -p "Hostname?  " hostname_ans
                         read -p "Local Network?  " local_net_ans
+                        read -p "Subnet?  " vpc_subnet_id_ans
+                        read -p "Security Groups?  " group_id_ans
                         read -p "SecureStack Server IP Address?  " server_ip_ans
                         read -p "authd password?  " authd_pass_ans
 			export ANSIBLE_HOST_KEY_CHECKING=False
+			echo "**************************************************************************"
+			echo "AWS access key 	= $aws_access_key_ans"
+			echo "AWS secret key 	= $aws_secret_key_ans"
+			echo "Hostname		= $hostname_ans"
+			echo "Local Network	= $local_net_ans"
+			echo "Subnet		= $vpc_subnet_id_ans"
+			echo "Security Group(s)	= $group_id_ans"
+			echo "Server IP Address = $server_ip_ans"
+			echo "Authd Password	= $authd_pass_ans"
+			echo "**************************************************************************"
+			echo "Everything look good?  If so, hit enter.  Otherwise Cntl-C to exit."
+			read
                         ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "local_net=$local_net_ans ossec_server_ip=$server_ip_ans authd_password=$authd_pass_ans hostname=$hostname_ans" \
-                                -e "aws_access_key=$aws_access_key_ans aws_secret_key=$aws_secret_key_ans"
+                                -e "aws_access_key=$aws_access_key_ans aws_secret_key=$aws_secret_key_ans vpc_subnet_id=$vpc_subnet_id_ans group_id=$group_id_ans"
                         ;;
                 *)
 			export ANSIBLE_HOST_KEY_CHECKING=False
