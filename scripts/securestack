@@ -244,9 +244,11 @@ provision() {
                         read -p "Local Network?  " local_net_ans
                         read -p "SecureStack Server IP Address?  " server_ip_ans
                         read -p "authd password?  " authd_pass_ans
+			export ANSIBLE_HOST_KEY_CHECKING=False
                         ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False local_net=$local_net_ans ossec_server_ip=$server_ip_ans authd_password=$authd_pass_ans hostname=$hostname_ans"
                         ;;
                 *)
+			export ANSIBLE_HOST_KEY_CHECKING=False
                         ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=securestack-base-$timestamp"
                         ;;
         esac
