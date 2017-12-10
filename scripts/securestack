@@ -250,14 +250,14 @@ provision() {
                         read -p "authd password?  " authd_pass_ans
 			export ANSIBLE_HOST_KEY_CHECKING=False
 			echo "**************************************************************************"
-			echo "AWS access key 	= $aws_access_key_ans"
-			echo "AWS secret key 	= $aws_secret_key_ans"
-			echo "Hostname		= $hostname_ans"
-			echo "Local Network	= $local_net_ans"
-			echo "Subnet		= $vpc_subnet_id_ans"
-			echo "Security Group(s)	= $group_id_ans"
-			echo "Server IP Address = $server_ip_ans"
-			echo "Authd Password	= $authd_pass_ans"
+			echo "AWS access key 		= $aws_access_key_ans"
+			echo "AWS secret key 		= $aws_secret_key_ans"
+			echo "Hostname			= $hostname_ans"
+			echo "Local Network		= $local_net_ans"
+			echo "Subnet			= $vpc_subnet_id_ans"
+			echo "Security Group(s)		= $group_id_ans"
+			echo "Server IP Address 	= $server_ip_ans"
+			echo "Authd Password		= $authd_pass_ans"
 			echo "**************************************************************************"
 			echo "Everything look good?  If so, hit enter.  Otherwise Cntl-C to exit."
 			read
