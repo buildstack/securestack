@@ -4,7 +4,7 @@
 SecureStack is a drop in security layer for all your IT infrastructure.  Think of us as a "Platform-Security-as-a-Service".  SecureStack comes in two forms:  SecureStack Base and SecureStack Server.  You can find both products here in the AWS [Marketplace](https://aws.amazon.com/marketplace/seller-profile?id=040c3d94-af50-430e-85a0-03719a4f9fad "AWS Marketplace")
 
 ### SecureStack Base ###
-SecureStack Base is intended to be the foundation you build all your AWS infrastrucuture with.  It is a hardened version of CentOS 7 and comes with many security applications baked right in.  So, if in the past you've used a Linux image from the AWS Marketplace, or a custom image you've built yourself you can replace it with our [SecureStack Base AMI](https://aws.amazon.com/marketplace/pp/B076JG5BHM/?ref=_ptnr_web_gh_readme_us "SecureStack Base AMI").  
+SecureStack Base is intended to be the foundation you build all your AWS infrastrucuture with.  It is a hardened version of CentOS 7 and comes with many security applications baked right in.  So, if in the past you've used a Linux image from the AWS Marketplace, or a custom image you've built yourself you can replace it with our [SecureStack Base AMI](https://aws.amazon.com/marketplace/pp/B0777BXSLW/?ref=_ptnr_web_gh_readme_us "SecureStack Base AMI").  
 
 SecureStack helps you meet your audit and compliance needs with multiple tools integrated into both Server and Base versions.  All SecureStack Base instances will report their compliance and audit data directly to their SecureStack Server controller.  SecureStack currently has modules for: PCI-DSS, OWASP, SCAP, and CIS.   
 
