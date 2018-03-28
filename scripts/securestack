@@ -294,7 +294,7 @@ update () {
 	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
 	if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
 	if [ $role = 'server' ]; then 
-		echo 'source /opt/securestack/bin/ansible/hacking/env-setup' >> /opt/securestack/.bash_profile;
+		grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup' >> /opt/securestack/.bash_profile;
 		source /opt/securestack/bin/ansible/hacking/env-setup;
 	fi
 	if [ -x /etc/yum.repos.d/wazuh.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo;fi
