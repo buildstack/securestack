@@ -339,7 +339,6 @@ update_ubuntu () {
                         ;;
                 esac
         echo "Your operating system is up to date"
-        fi
         echo "                                       "
 }
 
