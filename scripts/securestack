@@ -50,7 +50,8 @@ start () {
 			else echo "Disabling clamav..." && sudo systemctl stop clamd@scan && sudo systemctl disable clamd@scan
 			fi
 			if [ $(grep 'maldet:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
-				echo "Adding /mnt /media /opt/securestack to maldet monitor dirs." && sudo /usr/local/sbin/maldet --monitor /mnt /media /opt/securestack
+				echo "Adding /mnt /media /opt/securestack to maldet monitor dirs." && sudo /usr/local/sbin/maldet --monitor users && sudo /usr/local/sbin/maldet --monitor /mnt,/media
+				grep "/opt/securestack" /usr/local/maldetect/monitor_paths || echo '/opt/securestack' >> /usr/local/maldetect/monitor_paths
                                 echo "Enabling Linux Malware Detect..." && sudo systemctl start maldet && sudo systemctl enable maldet
                         else echo "Disabling maldet..." && sudo systemctl stop maldet && sudo systemctl disable maldet
                         fi	
@@ -301,11 +302,15 @@ mfa() {
         esac
 }
 
-update () {
+update_el () {
 	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
 	if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
-	if [ $role = 'server' ]; then echo 'source /opt/securestack/bin/ansible/hacking/env-setup' >> /opt/securestack/.bash_profile;fi
-	sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo && sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo 2>/dev/null
+	if [ $role = 'server' ]; then 
+		grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup' >> /opt/securestack/.bash_profile;
+		source /opt/securestack/bin/ansible/hacking/env-setup;
+	fi
+	if [ -x /etc/yum.repos.d/wazuh.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo;fi
+	if [ -x /etc/yum.repos.d/elastic.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo;fi
         cd /opt/securestack && git pull --quiet
         if [ $(yum check-update --quiet |wc -l) != 0 ]; then
 	echo "******************************************************************************"
@@ -324,9 +329,34 @@ update () {
 	echo "                                       "
 }
 
+update_ubuntu () {
+        if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
+        if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
+        if [ $role = 'server' ]; then
+                grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup' >> /opt/securestack/.bash_profile;
+                source /opt/securestack/bin/ansible/hacking/env-setup;
+        fi
+        cd /opt/securestack && git pull --quiet
+	sudo apt-get update
+        sudo /usr/lib/update-notifier/apt-check --human-readable
+        echo "******************************************************************************"
+        read -p "Do you want to update your operating system now? [y/n]  " updatenow
+                case "$updatenow" in
+                        [yY][eE][sS]|[yY])
+                                sudo apt-get upgrade
+                        ;;
+                        *)
+                                echo "Not updating operating system."
+                        ;;
+                esac
+        echo "Your operating system is up to date"
+        echo "                                       "
+}
+
 
 # Variables go here #
 sshome=/opt/securestack/
+os_ver=$(lsb_release -is)
 # Find securestack_role from securstack.yml file
 if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ];
         then role='server';
@@ -357,7 +387,7 @@ provision) provision $@
     ;;
 mfa) mfa
     ;;
-update)  update
+update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
     ;;
 status)  status $@
     ;;
