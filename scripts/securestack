@@ -1,7 +1,32 @@
 #!/bin/bash
 # Written by Paul McCarty <paulm@securestack.com.au> #
 
-stop () {
+stop_ubuntu () {
+        sudo /var/ossec/bin/ossec-control stop
+        # Daemons to manage go here #
+        daemons=(
+                wazuh-manager
+                wazuh-agent
+                fail2ban
+                filebeat
+                metricbeat
+                logstash
+                kibana
+                elasticsearch
+                maldet
+                clamav-daemon
+                clamav-freshclam
+                nginx
+                wazuh-api
+        )
+
+        for i in "${daemons[@]}"
+        do
+                echo "Disabling $i" && sudo systemctl stop $i && sudo systemctl disable $i
+        done
+}
+
+stop_el () {
 	sudo /var/ossec/bin/ossec-control stop
 	# Daemons to manage go here #
 	daemons=(
@@ -38,8 +63,22 @@ start () {
         	sudo systemctl start kibana && sudo systemctl enable kibana 
         	sudo systemctl start filebeat && sudo systemctl enable filebeat
         	sudo systemctl start metricbeat && sudo systemctl enable metricbeat
+        # Get IP information
+        echo " "
+        echo "============================================================================================================================================"
+        echo "As a general rule we suggest that you don't allow access to the Web UI from the internet at all.  But, in the absence of a VPN or some other"
+        echo "way to connect using the local IP address you will need to create a Security Group in AWS that allows access to HTTP (tcp 80) from your IP"
+        echo "address.  You will need to do this before you can connect successfully.  During the configuration you should have created a white_list of"
+        echo "known good IP source addresses.  Any addresses on the white_list were given access to HTTP (tcp 80)."
+        echo "============================================================================================================================================"
+        echo " "
+        echo "If you've allowed http access to the internet you can login to the SecureStack Web UI at http://$(curl -s icanhazip.com)"
+        echo "Otherwise you can login to the SecureStack Web UI at http://$(ifconfig eth0|grep inet|awk '{print $2}')"
+        echo " "
+        echo "============================================================================================================================================"
+
 	elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 hardened) -eq 1 ]; then
-		echo "SecureStack Role is STANDARD"
+		echo "SecureStack Role is HARDENED"
 		echo "Starting wazuh-agent..."; sudo systemctl start wazuh-agent && sudo systemctl enable wazuh-agent
 			if [ $(grep 'fail2ban:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
 				echo "Enabling fail2ban..." && sudo systemctl start fail2ban && sudo systemctl enable fail2ban
@@ -69,19 +108,6 @@ start () {
         	echo "Not doing anything."
 	fi
 	
-	# Get IP information
-	echo " "
-	echo "============================================================================================================================================"
-	echo "As a general rule we suggest that you don't allow access to the Web UI from the internet at all.  But, in the absence of a VPN or some other"
-	echo "way to connect using the local IP address you will need to create a Security Group in AWS that allows access to HTTP (tcp 80) from your IP"
-	echo "address.  You will need to do this before you can connect successfully.  During the configuration you should have created a white_list of"
-	echo "known good IP source addresses.  Any addresses on the white_list were given access to HTTP (tcp 80)."
-	echo "============================================================================================================================================"
-	echo " "
-	echo "If you've allowed http access to the internet you can login to the SecureStack Web UI at http://$(curl -s icanhazip.com)"
-	echo "Otherwise you can login to the SecureStack Web UI at http://$(ifconfig eth0|grep inet|awk '{print $2}')"
-	echo " "
-	echo "============================================================================================================================================"
 }
 
 configure_networking_server () {
@@ -338,7 +364,6 @@ update_ubuntu () {
                                 echo "Not updating operating system."
                         ;;
                 esac
-        echo "Your operating system is up to date"
         echo "                                       "
 }
 
@@ -360,11 +385,11 @@ case "$1" in
 
 help)  help
     ;;
-stop)  stop
+stop)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi
     ;;
 start)  start
     ;;
-configure)  if [ $role = 'server' ]; then configure_networking_server; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps; create_user
+configure)  if [ $role = 'server' ]; then configure_networking_server; create_user; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps
     ;;
 configure_network)  if [ $role = 'server' ]; then configure_networking_server; else configure_networking_base;fi
     ;;
