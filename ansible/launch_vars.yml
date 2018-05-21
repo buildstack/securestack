@@ -7,12 +7,12 @@ securestack_role: 'standard'
 aws_access_key:
 aws_secret_key:
 vpc_subnet_id: ''
-group_id: ''
+group_id: 'sg-fcca739a'
 ossec_server_ip: '172.31.14.125'
 
 # You can use these as defaults or change as needed #
 count: 1
-region: 'us-east-1'
+region: 'ap-southeast-2'
 authd_password: 'Ld1L8v8EcNAMDsePHeuYVjgzGfVaaLK1UnGHA7uS1cNKNyuPCRbjhnA8v9bXDiFR'
 local_net: '172.31.0.0/16'
 instance_type: t2.micro
