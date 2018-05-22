@@ -370,7 +370,14 @@ update_ubuntu () {
 
 # Variables go here #
 sshome=/opt/securestack/
-os_ver=$(lsb_release -is)
+if hash lsb_release 2>/dev/null; then 
+	os_ver=$(lsb_release -is); 
+else 
+	if [ -f /etc/redhat-release ]; then os_ver=$(awk '{print $1}' /etc/redhat-release ); fi
+elif	
+	if [ -f /etc/debian-version ]; then os_ver=Ubuntu; fi
+fi
+	
 # Find securestack_role from securstack.yml file
 if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ];
         then role='server';
