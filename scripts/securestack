@@ -413,7 +413,7 @@ update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
 status)  status $@
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|configure_network|configure_apps|create_user|update)    "
+    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|create_user|update)    "
     echo " "
     exit 1
    ;;
