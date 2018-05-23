@@ -116,6 +116,19 @@ agent () {
                         echo "Listing all SecureStack agents... "
                         sudo /var/ossec/bin/agent_control -l
                         ;;
+                [aA][cC][tT][iI][vV][eE]|[aA])
+                        echo "Listing all SecureStack active agents... "
+                        sudo /var/ossec/bin/agent_control -lc
+                        ;;
+                [iI][nN][fF][oO]|[iI])
+			if [[ $3 -ge 1 ]]; then
+                                sudo /var/ossec/bin/agent_control -i $3;
+                                exit 0;
+                        elif [ -z $3 ]; then
+                                echo "Which agents do you want to get info for? "
+                                exit 0;
+                        fi
+                        ;;
                 [rR][eE][sS][tT][aA][rR][tT]|[rR])
                         if [[ $3 = 'all' ]]; then
                                 sudo /var/ossec/bin/agent_control -Ra;
@@ -143,7 +156,7 @@ agent () {
                         fi
                         ;;
                 *)
-                        echo "Must supply verb.  Example:  securestack agent (list|restart|active)"; exit 0
+                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info)"; exit 0
                         ;;
         esac
 
