@@ -1,7 +1,32 @@
 #!/bin/bash
 # Written by Paul McCarty <paulm@securestack.com.au> #
 
-stop () {
+stop_ubuntu () {
+        sudo /var/ossec/bin/ossec-control stop
+        # Daemons to manage go here #
+        daemons=(
+                wazuh-manager
+                wazuh-agent
+                fail2ban
+                filebeat
+                metricbeat
+                logstash
+                kibana
+                elasticsearch
+                maldet
+                clamav-daemon
+                clamav-freshclam
+                nginx
+                wazuh-api
+        )
+
+        for i in "${daemons[@]}"
+        do
+                echo "Disabling $i" && sudo systemctl stop $i && sudo systemctl disable $i
+        done
+}
+
+stop_el () {
 	sudo /var/ossec/bin/ossec-control stop
 	# Daemons to manage go here #
 	daemons=(
@@ -38,8 +63,22 @@ start () {
         	sudo systemctl start kibana && sudo systemctl enable kibana 
         	sudo systemctl start filebeat && sudo systemctl enable filebeat
         	sudo systemctl start metricbeat && sudo systemctl enable metricbeat
+        # Get IP information
+        echo " "
+        echo "============================================================================================================================================"
+        echo "As a general rule we suggest that you don't allow access to the Web UI from the internet at all.  But, in the absence of a VPN or some other"
+        echo "way to connect using the local IP address you will need to create a Security Group in AWS that allows access to HTTP (tcp 80) from your IP"
+        echo "address.  You will need to do this before you can connect successfully.  During the configuration you should have created a white_list of"
+        echo "known good IP source addresses.  Any addresses on the white_list were given access to HTTP (tcp 80)."
+        echo "============================================================================================================================================"
+        echo " "
+        echo "If you've allowed http access to the internet you can login to the SecureStack Web UI at http://$(curl -s icanhazip.com)"
+        echo "Otherwise you can login to the SecureStack Web UI at http://$(ifconfig eth0|grep inet|awk '{print $2}')"
+        echo " "
+        echo "============================================================================================================================================"
+
 	elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 hardened) -eq 1 ]; then
-		echo "SecureStack Role is STANDARD"
+		echo "SecureStack Role is HARDENED"
 		echo "Starting wazuh-agent..."; sudo systemctl start wazuh-agent && sudo systemctl enable wazuh-agent
 			if [ $(grep 'fail2ban:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
 				echo "Enabling fail2ban..." && sudo systemctl start fail2ban && sudo systemctl enable fail2ban
@@ -69,19 +108,58 @@ start () {
         	echo "Not doing anything."
 	fi
 	
-	# Get IP information
-	echo " "
-	echo "============================================================================================================================================"
-	echo "As a general rule we suggest that you don't allow access to the Web UI from the internet at all.  But, in the absence of a VPN or some other"
-	echo "way to connect using the local IP address you will need to create a Security Group in AWS that allows access to HTTP (tcp 80) from your IP"
-	echo "address.  You will need to do this before you can connect successfully.  During the configuration you should have created a white_list of"
-	echo "known good IP source addresses.  Any addresses on the white_list were given access to HTTP (tcp 80)."
-	echo "============================================================================================================================================"
-	echo " "
-	echo "If you've allowed http access to the internet you can login to the SecureStack Web UI at http://$(curl -s icanhazip.com)"
-	echo "Otherwise you can login to the SecureStack Web UI at http://$(ifconfig eth0|grep inet|awk '{print $2}')"
-	echo " "
-	echo "============================================================================================================================================"
+}
+
+agent () {
+        case "$2" in
+                [lL][iI][sS][tT]|[lL])
+                        echo "Listing all SecureStack agents... "
+                        sudo /var/ossec/bin/agent_control -l
+                        ;;
+                [aA][cC][tT][iI][vV][eE]|[aA])
+                        echo "Listing all SecureStack active agents... "
+                        sudo /var/ossec/bin/agent_control -lc
+                        ;;
+                [iI][nN][fF][oO]|[iI])
+			if [[ $3 -ge 1 ]]; then
+                                sudo /var/ossec/bin/agent_control -i $3;
+                                exit 0;
+                        elif [ -z $3 ]; then
+                                echo "Which agents do you want to get info for? "
+                                exit 0;
+                        fi
+                        ;;
+                [rR][eE][sS][tT][aA][rR][tT]|[rR])
+                        if [[ $3 = 'all' ]]; then
+                                sudo /var/ossec/bin/agent_control -Ra;
+                                exit 0;
+                        elif [ -z $3 ]; then
+                                echo "Which agents do you want to restart?  If you want to restart all instances type all."
+                                echo "Otherwise if you want to restart a specific server supply its agent id."
+                                exit 0;
+                        elif [ $3 -ge 1 ]; then
+                                sudo /var/ossec/bin/agent_control -R -u $3;
+                                exit 0;
+                        fi
+                        ;;
+                 [sS][cC][aA][nN]|[sS])
+                        if [[ $3 = 'all' ]]; then
+                                sudo /var/ossec/bin/agent_control -ra;
+                                exit 0;
+                        elif [ -z $3 ]; then
+                                echo "Which agents do you want to scan?  If you want to scan all instances type all."
+                                echo "Otherwise if you want to scan a specific server supply its agent id."
+                                exit 0;
+                        elif [ $3 -ge 1 ]; then
+                                sudo /var/ossec/bin/agent_control -r -u $3;
+                                exit 0;
+                        fi
+                        ;;
+                *)
+                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info)"; exit 0
+                        ;;
+        esac
+
 }
 
 configure_networking_server () {
@@ -243,8 +321,8 @@ profile() {
                 [nN][eE][wW]|[nN])
 		echo "You are creating a new profile"
                         read -p "Which provider? Choices are: ec2, gce, azure, ali, vmware.  " provider_ans
-		
-	
+		;;
+	esac
 }
 
 provision() {
@@ -276,6 +354,22 @@ provision() {
                         ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "local_net=$local_net_ans ossec_server_ip=$server_ip_ans authd_password=$authd_pass_ans hostname=$hostname_ans" \
                                 -e "aws_access_key=$aws_access_key_ans aws_secret_key=$aws_secret_key_ans vpc_subnet_id=$vpc_subnet_id_ans group_id=$group_id_ans"
                         ;;
+		[hH][oO][sS][tT]|[hH][oO][sS][tT][nN][aA][mM][eE])
+                        export ANSIBLE_HOST_KEY_CHECKING=False
+                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=$3"
+                        ;;
+                [pP][rR][oO][fF]|[pP][rR][oO][fF][iI][lL][eE])
+                        if [ $4 = 'hostname' ]; then
+                                if [ -z $5 ]; then
+                                        echo "Must supply hostname.  Example:  securestack provision profile default hostname test-server01"; exit 0
+                                fi
+                                export ANSIBLE_HOST_KEY_CHECKING=False
+                                ansible-playbook $HOME/ansible/launch_securestack_profile.yml -e "host_key_checking=False hostname=$5 remote_user=securestack profile=$3"
+
+                        else
+                                echo "Must supply hostname.  Example:  securestack provision profile default hostname test-server01"; exit 0
+                        fi
+                        ;;
                 *)
 			export ANSIBLE_HOST_KEY_CHECKING=False
                         ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=securestack-base-$timestamp"
@@ -306,8 +400,8 @@ update_el () {
 	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
 	if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
 	if [ $role = 'server' ]; then 
-		grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup' >> /opt/securestack/.bash_profile;
-		source /opt/securestack/bin/ansible/hacking/env-setup;
+		grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null' >> /opt/securestack/.bash_profile;
+		source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null;
 	fi
 	if [ -x /etc/yum.repos.d/wazuh.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo;fi
 	if [ -x /etc/yum.repos.d/elastic.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo;fi
@@ -349,14 +443,20 @@ update_ubuntu () {
                                 echo "Not updating operating system."
                         ;;
                 esac
-        echo "Your operating system is up to date"
         echo "                                       "
 }
 
 
 # Variables go here #
 sshome=/opt/securestack/
-os_ver=$(lsb_release -is)
+
+# Find version of operating system
+if hash lsb_release 2>/dev/null; then
+        os_ver=$(lsb_release -is);
+elif [ -f /etc/redhat-release ]; then os_ver=$(awk '{print $1}' /etc/redhat-release);
+elif [ -f /etc/debian-version ]; then os_ver=Ubuntu;
+fi
+	
 # Find securestack_role from securstack.yml file
 if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ];
         then role='server';
@@ -371,15 +471,17 @@ case "$1" in
 
 help)  help
     ;;
-stop)  stop
+stop)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi
     ;;
 start)  start
     ;;
-configure)  if [ $role = 'server' ]; then configure_networking_server; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps; create_user
+configure)  if [ $role = 'server' ]; then configure_networking_server; create_user; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps
     ;;
 configure_network)  if [ $role = 'server' ]; then configure_networking_server; else configure_networking_base;fi
     ;;
 configure_apps)  configure_apps
+    ;;
+agent)  agent $@
     ;;
 create_user) create_user
     ;;
@@ -392,7 +494,7 @@ update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
 status)  status $@
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|configure_network|configure_apps|create_user|update)    "
+    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|create_user|update)    "
     echo " "
     exit 1
    ;;
