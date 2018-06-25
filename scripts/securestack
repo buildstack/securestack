@@ -446,6 +446,24 @@ update_ubuntu () {
         echo "                                       "
 }
 
+elasticsearch () {
+### this section needs to show all indices and their size. additionally it needs to remove or prune existing indices. ###
+	case "$2" in
+            [lL][iI][sS][tT]|[lL])
+                curl http://localhost:9200/getsomething;
+                ;;
+            [pP][rR][uU][nN][eE]|[pP])
+                curl http://localhost:9200/getsomething;
+                ;;
+            [iI][nN][fF][oO]|[iI])
+                curl http://localhost:9200/getsomething;
+                ;;
+            *)
+                echo "Must supply verb.  Example:  securestack elasticsearch (list|prune|info)"; exit 0
+                ;;
+        esac
+}	
+
 
 # Variables go here #
 sshome=/opt/securestack/
