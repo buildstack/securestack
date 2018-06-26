@@ -478,6 +478,18 @@ green_index=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=green" | grep
         esac
 }	
 
+status() {
+echo "******************************************************************************"
+yellow_index=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=yellow" | grep -v ^"health status"| wc -l)
+green_index=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=green" | grep -v ^"health status"| wc -l)
+echo "There are $green_index GREEN indices"
+echo "There are $yellow_index YELLOW indices"
+echo "Note: a single node cluster will show all indices as yellow."
+echo "******************************************************************************"
+if [ -f /var/log/lynis.log ]; then grep -o "Hardening index.*" /var/log/lynis.log; fi
+
+}
+
 
 # Variables go here #
 sshome=/opt/securestack/
@@ -528,7 +540,7 @@ update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
 status)  status $@
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|create_user|update)    "
+    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|create_user|update)    "
     echo " "
     exit 1
    ;;
