@@ -448,15 +448,30 @@ update_ubuntu () {
 
 elasticsearch () {
 ### this section needs to show all indices and their size. additionally it needs to remove or prune existing indices. ###
+yellow_alert=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=yellow" | grep -v ^"health status"| wc -l)
+green_alert=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=green" | grep -v ^"health status"| wc -l)
+red_alert=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=red" | grep -v ^"health status"| wc -l)
 	case "$2" in
             [lL][iI][sS][tT]|[lL])
-                curl http://localhost:9200/getsomething;
+                curl -X GET "localhost:9200/_cat/indices?v";
                 ;;
             [pP][rR][uU][nN][eE]|[pP])
-                curl http://localhost:9200/getsomething;
+                echo "******************************************************************************"
+        		read -p "Do you want to prune all metricbeat indices? This is usually enough to make Elasticsearch healthy. [y/n]  " prune_metric
+                		case "$prune_metric" in
+                        		[yY][eE][sS]|[yY])
+                               		 	curl -s -X DELETE "localhost:9200/metricbeat-*"
+                        		;;
+                        		*)
+                                		echo "Not pruning all metricbeat indices";
+                        		;;
+                		esac
+	
                 ;;
             [iI][nN][fF][oO]|[iI])
-                curl http://localhost:9200/getsomething;
+                echo "There are $green_alerts GREEN indices"
+                echo "There are $yellow_alerts YELLOW indices"
+                echo "There are $red_alerts RED indices"
                 ;;
             *)
                 echo "Must supply verb.  Example:  securestack elasticsearch (list|prune|info)"; exit 0
