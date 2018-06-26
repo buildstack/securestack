@@ -110,6 +110,58 @@ start () {
 	
 }
 
+agent () {
+        case "$2" in
+                [lL][iI][sS][tT]|[lL])
+                        echo "Listing all SecureStack agents... "
+                        sudo /var/ossec/bin/agent_control -l
+                        ;;
+                [aA][cC][tT][iI][vV][eE]|[aA])
+                        echo "Listing all SecureStack active agents... "
+                        sudo /var/ossec/bin/agent_control -lc
+                        ;;
+                [iI][nN][fF][oO]|[iI])
+			if [[ $3 -ge 1 ]]; then
+                                sudo /var/ossec/bin/agent_control -i $3;
+                                exit 0;
+                        elif [ -z $3 ]; then
+                                echo "Which agents do you want to get info for? "
+                                exit 0;
+                        fi
+                        ;;
+                [rR][eE][sS][tT][aA][rR][tT]|[rR])
+                        if [[ $3 = 'all' ]]; then
+                                sudo /var/ossec/bin/agent_control -Ra;
+                                exit 0;
+                        elif [ -z $3 ]; then
+                                echo "Which agents do you want to restart?  If you want to restart all instances type all."
+                                echo "Otherwise if you want to restart a specific server supply its agent id."
+                                exit 0;
+                        elif [ $3 -ge 1 ]; then
+                                sudo /var/ossec/bin/agent_control -R -u $3;
+                                exit 0;
+                        fi
+                        ;;
+                 [sS][cC][aA][nN]|[sS])
+                        if [[ $3 = 'all' ]]; then
+                                sudo /var/ossec/bin/agent_control -ra;
+                                exit 0;
+                        elif [ -z $3 ]; then
+                                echo "Which agents do you want to scan?  If you want to scan all instances type all."
+                                echo "Otherwise if you want to scan a specific server supply its agent id."
+                                exit 0;
+                        elif [ $3 -ge 1 ]; then
+                                sudo /var/ossec/bin/agent_control -r -u $3;
+                                exit 0;
+                        fi
+                        ;;
+                *)
+                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info)"; exit 0
+                        ;;
+        esac
+
+}
+
 configure_networking_server () {
 	echo "******************************************************************************"
 	echo "############ local_net section #######################################"
@@ -263,8 +315,19 @@ configure_apps () {
 		
 }
 
+profile() {
+	export ANSIBLE_HOST_KEY_CHECKING=False
+	case "$2" in
+                [nN][eE][wW]|[nN])
+		echo "You are creating a new profile"
+                        read -p "Which provider? Choices are: ec2, gce, azure, ali, vmware.  " provider_ans
+		;;
+	esac
+}
+
 provision() {
 	timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+	export ANSIBLE_HOST_KEY_CHECKING=False
 	case "$2" in
                 [iI][nN][tT]|[iI])
                         read -p "AWS access key?  " aws_access_key_ans
@@ -290,6 +353,22 @@ provision() {
 			read
                         ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "local_net=$local_net_ans ossec_server_ip=$server_ip_ans authd_password=$authd_pass_ans hostname=$hostname_ans" \
                                 -e "aws_access_key=$aws_access_key_ans aws_secret_key=$aws_secret_key_ans vpc_subnet_id=$vpc_subnet_id_ans group_id=$group_id_ans"
+                        ;;
+		[hH][oO][sS][tT]|[hH][oO][sS][tT][nN][aA][mM][eE])
+                        export ANSIBLE_HOST_KEY_CHECKING=False
+                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=$3"
+                        ;;
+                [pP][rR][oO][fF]|[pP][rR][oO][fF][iI][lL][eE])
+                        if [ $4 = 'hostname' ]; then
+                                if [ -z $5 ]; then
+                                        echo "Must supply hostname.  Example:  securestack provision profile default hostname test-server01"; exit 0
+                                fi
+                                export ANSIBLE_HOST_KEY_CHECKING=False
+                                ansible-playbook $HOME/ansible/launch_securestack_profile.yml -e "host_key_checking=False hostname=$5 remote_user=securestack profile=$3"
+
+                        else
+                                echo "Must supply hostname.  Example:  securestack provision profile default hostname test-server01"; exit 0
+                        fi
                         ;;
                 *)
 			export ANSIBLE_HOST_KEY_CHECKING=False
@@ -367,6 +446,38 @@ update_ubuntu () {
         echo "                                       "
 }
 
+elasticsearch () {
+### this section needs to show all indices and their size. additionally it needs to remove or prune existing indices. ###
+yellow_index=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=yellow" | grep -v ^"health status"| wc -l)
+green_index=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=green" | grep -v ^"health status"| wc -l)
+	case "$2" in
+            [lL][iI][sS][tT]|[lL])
+                curl -X GET "localhost:9200/_cat/indices?v";
+                ;;
+            [pP][rR][uU][nN][eE]|[pP])
+                echo "******************************************************************************"
+        		read -p "Do you want to prune all metricbeat indices? This is usually enough to make Elasticsearch healthy. [y/n]  " prune_metric
+                		case "$prune_metric" in
+                        		[yY][eE][sS]|[yY])
+                               		 	curl -s -X DELETE "localhost:9200/metricbeat-*"
+                        		;;
+                        		*)
+                                		echo "Not pruning all metricbeat indices";
+                        		;;
+                		esac
+	
+                ;;
+            [iI][nN][fF][oO]|[iI])
+                echo "There are $green_index GREEN indices"
+                echo "There are $yellow_index YELLOW indices"
+		echo "Note: a single node cluster will show all indices as yellow."
+                ;;
+            *)
+                echo "Must supply verb.  Example:  securestack elasticsearch (list|prune|info)"; exit 0
+                ;;
+        esac
+}	
+
 
 # Variables go here #
 sshome=/opt/securestack/
@@ -402,9 +513,13 @@ configure_network)  if [ $role = 'server' ]; then configure_networking_server; e
     ;;
 configure_apps)  configure_apps
     ;;
+agent)  agent $@
+    ;;
 create_user) create_user
     ;;
 provision) provision $@
+    ;;
+elasticsearch) elasticsearch $@
     ;;
 mfa) mfa
     ;;
