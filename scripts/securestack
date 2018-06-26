@@ -448,9 +448,9 @@ update_ubuntu () {
 
 elasticsearch () {
 ### this section needs to show all indices and their size. additionally it needs to remove or prune existing indices. ###
-yellow_alert=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=yellow" | grep -v ^"health status"| wc -l)
-green_alert=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=green" | grep -v ^"health status"| wc -l)
-red_alert=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=red" | grep -v ^"health status"| wc -l)
+yellow_alerts=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=yellow" | grep -v ^"health status"| wc -l)
+green_alerts=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=green" | grep -v ^"health status"| wc -l)
+red_alerts=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=red" | grep -v ^"health status"| wc -l)
 	case "$2" in
             [lL][iI][sS][tT]|[lL])
                 curl -X GET "localhost:9200/_cat/indices?v";
