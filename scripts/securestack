@@ -520,6 +520,8 @@ create_user) create_user
     ;;
 provision) provision $@
     ;;
+elasticsearch) elasticsearch $@
+    ;;
 mfa) mfa
     ;;
 update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
