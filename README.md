@@ -36,7 +36,7 @@ SecureStack Server also has:
 
 ### Initial Installation ###
 
-After you've launched a SecureStack Base or Server instance you can ssh into it with the username securestack and the ssh key you provided. The first thing you will want to do is update the SecureStack sofware and operating system.
+You can find the latest Installation and User Guide as a Google document](https://docs.google.com/presentation/d/1WY1XRK3NKQes7gHf2NCZsnNvTXytBfuYj3ksJWE7cDQ/edit?usp=sharing "SecureStack Installation and User Guide")  After you've launched a SecureStack Base or Server instance you can ssh into it with the username securestack and the ssh key you provided. The first thing you will want to do is update the SecureStack sofware and operating system.
 
 To update all versions of SecureStack run this from the command line:
 
@@ -46,28 +46,41 @@ This command updates the CentOS operating system so occasionally you will have t
 
 #### AWS: S3, and IAM ####
 
-If you are going to run SecureStack workloads in AWS there are a couple things you can do to optimize your configuration.  These steps are not strictly necessary, but will help to make your environment both more efficient as well as more secure.  First, you will want to create an IAM role called "securestack-ec2-allow-S3".  Copy this into your policy:
+If you are going to run SecureStack workloads in AWS there are a couple things you can do to optimize your configuration.  These steps are not strictly necessary, but will help to make your environment both more efficient as well as more secure.  First, you will want to create an IAM policy called "securestack-ec2-allow-S3".  Copy this into your policy:
 ```
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-         "ec2:RunInstances",
-         "ec2:AssociateIamInstanceProfile",
-         "ec2:ReplaceIamInstanceProfileAssociation"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": "iam:PassRole",
-      "Resource": "*"
-    }
-  ]
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::securestack",
+                "arn:aws:s3:::securestack-elasticsearch-snapshots"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject",
+                "s3:ListObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::securestack/",
+                "arn:aws:s3:::securestack/*",
+                "arn:aws:s3:::securestack-elasticsearch-snapshots/",
+                "arn:aws:s3:::securestack-elasticsearch-snapshots/*"
+            ]
+        }
+    ]
 }
 ```
+
+Next, you will want to create a role called "securestack-server-role" and attach the "securestack-ec2-allow-S3" policy to it.  Finally, search and find the "AmazonEC2FullAccess" policy and attach that to the "securestack-server-role".  Finally, in the AWS ec2 console attach the "securestack-server-role" to your SecureStack SIPServer instance.  This will allow you to create and manage SecureStack ec2 instances as well as backup parts of the SecureStack platform to S3.
 
 #### AWS AMIs ####
 
@@ -107,6 +120,7 @@ The services you can enable/disable are:
 * Metricbeat
 * SCAP auditing tool
 * Lynis system auditing
+* Web Application Firewall
 
 All configuration is contained in the /opt/securestack/securestack.yml file.  You can edit this file rather than running the configuration script.
 
@@ -117,9 +131,9 @@ Once you've run the configuration wizard you can start the SecureStack engine: `
 SecureStack Base is all ready to go now!  You can build whatever you want to using your SecureStack Base instances.
 
 #### SecureStack Server Web UI ####
-SecureStack Server comes with a full featured web based SIEM and you should now be able to use the web ui.  In a browser you can open http://server_address_here to see the SecureStack Server UI.  If you can't connect, verify that your AWS security groups allow access to http (tcp 80).
+SecureStack Server comes with a full featured web based SIEM and you should now be able to use the web ui.  In a browser you can open http://server_address_here to see the SecureStack Server UI.  During the configuration you would have had the opportunity to create a user and password for the the web ui.  When you are prompted for the username and password enter it.  In a browser you can open http://server_address_here to see the SecureStack Server UI.  If you can't connect, verify that your AWS security groups allow access to http (tcp 80). You can watch this [video to learn more about our SIEM] (https://youtu.be/oaBxbiCv1UU "Introduction to SecureStack SIEM")
 
-The username for the web ui is securestack and the password should have been displayed during the configuration process.  You can also find the password in the securestack.yml configuration file.
+During the configuration you would have had the opportunity to create a user and password for the the web ui. 
 
 Enjoy!
 
