@@ -240,6 +240,7 @@ create_user () {
                         echo "Enter the new password? "; read -s nginx_pass
                         sudo htpasswd -cb /etc/nginx/htpasswd.users $nginx_user $nginx_pass || echo "No htpasswd found.  This command only works on Server instances"
                         unset nginx_pass
+			sudo chown nginx:nginx /etc/nginx/htpasswd.users
                         ;;
                 *)
                         echo "Cancelling new user creation."
@@ -398,7 +399,10 @@ mfa() {
 
 update_el () {
 	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
-	if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
+	if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; 
+		then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;
+		     chown -R securestack /opt/securestack/
+	fi
 	if [ $role = 'server' ]; then 
 		grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null' >> /opt/securestack/.bash_profile;
 		source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null;
