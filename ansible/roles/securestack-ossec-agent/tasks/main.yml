@@ -6,8 +6,13 @@
     src: wazuh.repo
     dest: /etc/yum.repos.d/
 
-- name: Install wazuh ossec agent
+- name: Install wazuh ossec agent on CentOS and Redhat
   action: yum pkg=wazuh-agent state=latest
+  when: ansible_os_family == "RedHat"
+
+- name: Install wazuh ossec agent on Ubuntu
+  apt:
+    deb: securestack-ubuntu-agent_2.0.1-1xenial_amd64.deb
 
 - name: Copy ossec.conf template
   template:
