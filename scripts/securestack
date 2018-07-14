@@ -340,10 +340,6 @@ profile() {
 				echo "Must provide a profile name and target to apply.  Example: securestack profile apply test_profile server01"; 
 				exit 0; 
 			fi
-			elif
-			
-			
-
 			;;
                 *)
                         echo "Must supply verb.  Example:  securestack profile (create|remove|apply|show|list)"; exit 0
@@ -538,7 +534,7 @@ else role='hardened';
 fi
 
 # Make sure $sshome is owned by securestack:securestack
-chown -R securestack:securestack /opt/securestack
+sudo chown -R securestack:securestack /opt/securestack
 
 case "$1" in
 
