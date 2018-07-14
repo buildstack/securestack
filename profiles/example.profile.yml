@@ -1,0 +1,17 @@
+---
+### individual modules ###
+clamav: 'disabled'
+fail2ban: 'enabled'
+maldet: 'disabled'
+metricbeat: 'disabled'
+filebeat: 'disabled'
+rkhunter: 'disabled'
+waf: 'disabled'
+
+### Your cloud network subnet go here ###
+local_net: '172.31.0.0/16'
+
+### Add your IP addresses to whitelist here ###
+whitelist:
+    - 10.0.0.0/24 # Trusted networks
+    - 1.2.3.4 # Public IP of remote office

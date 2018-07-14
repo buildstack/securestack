@@ -323,7 +323,7 @@ profile() {
 			echo "You are creating a new profile.  This will allow you apply which security applications are running"
 			echo "on individual servers or groups of servers."
 			if [ -f $sshome/profiles/$3.profile.yml ]; then echo "That profile already exists."; exit 0; fi
-			cp $sshome/securestack.yml $sshome/profiles/$3.profile.yml
+			cp $sshome/profiles/example.profile.yml $sshome/profiles/$3.profile.yml
 			configure_apps $sshome/profiles/$3.profile.yml
 			;;
                 [lL][iI][sS]|[tT])
