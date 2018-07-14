@@ -324,15 +324,16 @@ profile() {
 			echo "on individual servers or groups of servers."
 			if [ -f $sshome/profiles/$3.profile.yml ]; then echo "That profile already exists."; exit 0; fi
 			cp $sshome/profiles/example.profile.yml $sshome/profiles/$3.profile.yml
+			echo "profile_name: $3" >> $sshome/profiles/$3.profile.yml
 			configure_apps $sshome/profiles/$3.profile.yml
 			;;
                 [lL][iI][sS]|[tT])
 			echo "Listing all profiles... "
-			grep -s "profile_name:" $sshome/profiles | awk '{print $2}'
+			grep -s "profile_name: " $sshome/profiles/*.profile.yml | awk '{print $2}'
 			;;
                 [sS][hH][oO][wW]|[sS])
 			if [ -z $3 ]; then echo "Must provide a profile name.  Example: securestack profile show test_profile"; exit 0; fi
-			cat $sshome/profiles/$3
+			cat $sshome/profiles/$3.profile.yml
 			;;
                 [aA][pP][pP][lL][yY]|[aA])
 			echo "Applying profile..."
