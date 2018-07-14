@@ -262,55 +262,55 @@ configure_apps () {
 	# clamav section
 	case "$clamav_ans" in
     		[yY][eE][sS]|[yY]) 
-        		sed -i "s/^clamav:.*/clamav: 'enabled'/g" /opt/securestack/securestack.yml
+        		sed -i "s/^clamav:.*/clamav: 'enabled'/g" $1
         		;;
     		*)
-        		sed -i "s/^clamav:.*/clamav: 'disabled'/g" /opt/securestack/securestack.yml
+        		sed -i "s/^clamav:.*/clamav: 'disabled'/g" $1
         		;;
 	esac
 	
 	# maldet section
         case "$maldet_ans" in
                 [yY][eE][sS]|[yY])
-                        sed -i "s/^maldet:.*/maldet: 'enabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^maldet:.*/maldet: 'enabled'/g" $1
                         ;;
                 *)
-                        sed -i "s/^maldet:.*/maldet: 'disabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^maldet:.*/maldet: 'disabled'/g" $1
                         ;;
         esac
 
         # fail2ban section
         case "$fail2ban_ans" in
                 [yY][eE][sS]|[yY])
-                        sed -i "s/^fail2ban:.*/fail2ban: 'enabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^fail2ban:.*/fail2ban: 'enabled'/g" $1
                         ;;
                 *)
-                        sed -i "s/^fail2ban:.*/fail2ban: 'disabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^fail2ban:.*/fail2ban: 'disabled'/g" $1
                         ;;
         esac
 
         # metricbeat section
         case "$metricbeat_ans" in
                 [yY][eE][sS]|[yY])
-                        sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" $1
                         ;;
                 *)
-                        sed -i "s/^metricbeat:.*/metricbeat: 'disabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^metricbeat:.*/metricbeat: 'disabled'/g" $1
                         ;;
         esac
 
 	# filebeat section
         case "$filebeat_ans" in
                 [yY][eE][sS]|[yY])
-                        sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" $1
                         ;;
                 *)
-                        sed -i "s/^filebeat:.*/filebeat: 'disabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^filebeat:.*/filebeat: 'disabled'/g" $1
                         ;;
         esac
 	
-	if [ $role = 'server' ]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" /opt/securestack/securestack.yml; fi
-	if [ $role = 'server' ]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" /opt/securestack/securestack.yml; fi
+	if [ $role = 'server' ]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" $1
+	if [ $role = 'server' ]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" $1
 	
 		
 }
@@ -319,13 +319,10 @@ profile() {
 	export ANSIBLE_HOST_KEY_CHECKING=False
 	case "$2" in
                 [cC][rR][eE][aA][tT][eE]|[cC])
-			echo "You are creating a new profile."
-                        if [ -z $3 ]; then echo "Which provider? Choices are: ec2, gce, azure, ali, vmware.  ";exit 0; fi
-			        case "$3" in
-                			[eE][cC][2]|[aA][wW][sS])
-                        			echo "You are creating a new AWS ec2 profile."
-						;;
-                			[eE][cC][2]|[aA][wW][sS])
+			echo "You are creating a new profile.  This will allow you apply which security applications are running"
+			echo "on individual servers or groups of servers."
+			if [ -z $3 ]; then echo "Must provide a profile name.  Example: securestack profile create test_profile"; exit 0; fi
+
 			;;
                 [lL][iI][sS]|[tT])
 			echo "Listing all profiles... "
@@ -546,11 +543,11 @@ stop)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi
     ;;
 start)  start
     ;;
-configure)  if [ $role = 'server' ]; then configure_networking_server; create_user; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps
+configure)  if [ $role = 'server' ]; then configure_networking_server; create_user; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps "/opt/securestack/securestack.yml"
     ;;
 configure_network)  if [ $role = 'server' ]; then configure_networking_server; else configure_networking_base;fi
     ;;
-configure_apps)  configure_apps
+configure_apps)  configure_apps "/opt/securestack/securestack.yml"
     ;;
 agent)  agent $@
     ;;
