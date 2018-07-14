@@ -327,7 +327,7 @@ profile() {
 			echo "profile_name: $3" >> $sshome/profiles/$3.profile.yml
 			configure_apps $sshome/profiles/$3.profile.yml
 			;;
-                [lL][iI][sS]|[tT])
+                [lL][iI][sS][tT]|[lL])
 			echo "Listing all profiles... "
 			grep -s "profile_name: " $sshome/profiles/*.profile.yml | awk '{print $2}'
 			;;
