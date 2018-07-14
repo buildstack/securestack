@@ -556,6 +556,8 @@ create_user) create_user
     ;;
 provision) provision $@
     ;;
+profile) profile $@
+    ;;
 elasticsearch) elasticsearch $@
     ;;
 mfa) mfa
