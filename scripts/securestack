@@ -468,6 +468,50 @@ update_ubuntu () {
         echo "                                       "
 }
 
+elasticsearch () {
+### this section needs to show all indices and their size. additionally it needs to remove or prune existing indices. ###
+yellow_index=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=yellow" | grep -v ^"health status"| wc -l)
+green_index=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=green" | grep -v ^"health status"| wc -l)
+	case "$2" in
+            [lL][iI][sS][tT]|[lL])
+                curl -X GET "localhost:9200/_cat/indices?v";
+                ;;
+            [pP][rR][uU][nN][eE]|[pP])
+                echo "******************************************************************************"
+        		read -p "Do you want to prune all metricbeat indices? This is usually enough to make Elasticsearch healthy. [y/n]  " prune_metric
+                		case "$prune_metric" in
+                        		[yY][eE][sS]|[yY])
+                               		 	curl -s -X DELETE "localhost:9200/metricbeat-*"
+                        		;;
+                        		*)
+                                		echo "Not pruning all metricbeat indices";
+                        		;;
+                		esac
+	
+                ;;
+            [iI][nN][fF][oO]|[iI])
+                echo "There are $green_index GREEN indices"
+                echo "There are $yellow_index YELLOW indices"
+		echo "Note: a single node cluster will show all indices as yellow."
+                ;;
+            *)
+                echo "Must supply verb.  Example:  securestack elasticsearch (list|prune|info)"; exit 0
+                ;;
+        esac
+}	
+
+status() {
+echo "******************************************************************************"
+yellow_index=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=yellow" | grep -v ^"health status"| wc -l)
+green_index=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=green" | grep -v ^"health status"| wc -l)
+echo "There are $green_index GREEN indices"
+echo "There are $yellow_index YELLOW indices"
+echo "Note: a single node cluster will show all indices as yellow."
+echo "******************************************************************************"
+if [ -f /var/log/lynis.log ]; then sudo grep -o "Hardening index.*" /var/log/lynis.log; fi
+
+}
+
 
 # Variables go here #
 sshome=/opt/securestack/
@@ -509,6 +553,8 @@ create_user) create_user
     ;;
 provision) provision $@
     ;;
+elasticsearch) elasticsearch $@
+    ;;
 mfa) mfa
     ;;
 update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
@@ -516,7 +562,7 @@ update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
 status)  status $@
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|create_user|update)    "
+    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|create_user|update)    "
     echo " "
     exit 1
    ;;
