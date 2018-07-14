@@ -318,10 +318,32 @@ configure_apps () {
 profile() {
 	export ANSIBLE_HOST_KEY_CHECKING=False
 	case "$2" in
-                [nN][eE][wW]|[nN])
-		echo "You are creating a new profile"
+                [cC][rR][eE][aA][tT][eE]|[cC])
+			echo "You are creating a new profile"
                         read -p "Which provider? Choices are: ec2, gce, azure, ali, vmware.  " provider_ans
-		;;
+			;;
+                [lL][iI][sS]|[tT])
+			echo "Listing all profiles... "
+			grep -s "profile_name:" $sshome/profiles | awk '{print $2}'
+			;;
+                [sS][hH][oO][wW]|[sS])
+			if [ -z $3 ]; then echo "Must provide a profile name.  Example: securestack profile show test_profile"; exit 0; fi
+			cat $sshome/profiles/$3
+			;;
+                [aA][pP][pP][lL][yY]|[aA])
+			echo "Applying profile..."
+			if [ -z $3 ]; then 
+				echo "Must provide a profile name and target to apply.  Example: securestack profile apply test_profile server01"; 
+				exit 0; 
+			fi
+			elif
+			
+			
+
+			;;
+                *)
+                        echo "Must supply verb.  Example:  securestack profile (create|remove|apply|show|list)"; exit 0
+			;;
 	esac
 }
 
