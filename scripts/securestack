@@ -319,8 +319,13 @@ profile() {
 	export ANSIBLE_HOST_KEY_CHECKING=False
 	case "$2" in
                 [cC][rR][eE][aA][tT][eE]|[cC])
-			echo "You are creating a new profile"
-                        read -p "Which provider? Choices are: ec2, gce, azure, ali, vmware.  " provider_ans
+			echo "You are creating a new profile."
+                        if [ -z $3 ]; then echo "Which provider? Choices are: ec2, gce, azure, ali, vmware.  ";exit 0; fi
+			        case "$3" in
+                			[eE][cC][2]|[aA][wW][sS])
+                        			echo "You are creating a new AWS ec2 profile."
+						;;
+                			[eE][cC][2]|[aA][wW][sS])
 			;;
                 [lL][iI][sS]|[tT])
 			echo "Listing all profiles... "
