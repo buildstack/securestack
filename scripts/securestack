@@ -309,8 +309,8 @@ configure_apps () {
                         ;;
         esac
 	
-	if [ $role = 'server' ]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" $1
-	if [ $role = 'server' ]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" $1
+	if [ $role = 'server' ]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" $1; fi
+	if [ $role = 'server' ]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" $1; fi
 	
 		
 }
