@@ -537,6 +537,9 @@ elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 naked) -eq 1
 else role='hardened';
 fi
 
+# Make sure $sshome is owned by securestack:securestack
+chown -R securestack:securestack /opt/securestack
+
 case "$1" in
 
 help)  help
