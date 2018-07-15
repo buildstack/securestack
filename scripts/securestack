@@ -52,7 +52,7 @@ stop_el () {
 }
 
 start () {
-	if [ $(grep 'securestack_role:' /etc/securestack | grep -i -cim1 server) -eq 1 ]; then
+	if [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ]; then
 		echo "SecureStack Role is SERVER"
 		echo "Starting Wazuh, Elasticsearch, Logstash, Kibana, Filebeat and Metricbeat"
         	sudo systemctl start wazuh-manager && sudo systemctl enable wazuh-manager
