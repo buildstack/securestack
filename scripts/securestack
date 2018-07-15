@@ -187,10 +187,10 @@ configure_networking_server () {
 	sudo ufw --force enable
 	echo "******************************************************************************"
 
-	echo "Writing $local_net to local_net in $sshome/securestack.yml."
-        sed -i "s#^local_net:.*#local_net: '$local_net'#g" /opt/securestack/securestack.yml
-	echo "Writing $white_list to white_list in $sshome/securestack.yml."
-        sed -i "s#^white_list:.*#white_list: '$white_list'#g" /opt/securestack/securestack.yml
+	echo "Writing ${local_net[@]} to local_net in $sshome/securestack.yml."
+        sed -i "s#^local_net:.*#local_net: '$(echo ${local_net[@]})'#g" /opt/securestack/securestack.yml
+	echo "Writing ${white_list[@]} to white_list in $sshome/securestack.yml."
+	sed -i "s#^white_list:.*#white_list: '$(echo ${white_list[@]})'#g" /opt/securestack/securestack.yml
 
 	echo "Allowing access to OSSEC from local_net."
         for subnets in ${local_net[@]}
@@ -234,10 +234,10 @@ configure_networking_base () {
                 sudo ufw allow proto tcp from $ip to any port 22
         done
 
-        #echo "Writing $local_net to local_net in $sshome/securestack.yml."
-        #sed -i "s#^local_net:.*#local_net: '$local_net'#g" /opt/securestack/securestack.yml
-        echo "Writing $white_list to white_list in $sshome/securestack.yml."
-        sed -i "s#^white_list:.*#white_list: '$white_list'#g" /opt/securestack/securestack.yml
+        #echo "Writing ${local_net[@]} to local_net in $sshome/securestack.yml."
+        #sed -i "s#^local_net:.*#local_net: '$(echo ${local_net[@]})'#g" /opt/securestack/securestack.yml
+        echo "Writing ${white_list[@]} to white_list in $sshome/securestack.yml."
+	sed -i "s#^white_list:.*#white_list: '$(echo ${white_list[@]})'#g" /opt/securestack/securestack.yml
 
         echo "******************************************************************************"
         echo "Removing inital ssh rule..."
