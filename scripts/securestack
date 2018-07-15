@@ -337,7 +337,8 @@ profile() {
 			echo "on individual servers or groups of servers."
 			if [ -f $sshome/profiles/$3.profile.yml ]; then echo "That profile already exists."; exit 0; fi
 			cp $sshome/profiles/example.profile.yml $sshome/profiles/$3.profile.yml
-			echo "profile_name: $3" >> $sshome/profiles/$3.profile.yml
+			#sed -i "s/^profile_name:.*/profile_name: '$3'/g" 
+			sed -i '/---/a profile_name: $3' ./profiles/$3.profile.yml
 			configure_apps $sshome/profiles/$3.profile.yml
 			;;
                 [lL][iI][sS][tT]|[lL])
@@ -356,7 +357,7 @@ profile() {
 				echo "Must provide a target to apply profile to.  Example: securestack profile apply test_profile server01"; 
 				exit 0; 
 			fi
-			
+			scp $sshome/profiles/$3.profile.yml securestack@$4:$sshome/securestack.yml
 			
 			;;
                 *)
@@ -560,7 +561,7 @@ help)  help
     ;;
 stop)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi
     ;;
-start)  start
+start)  start $@
     ;;
 configure)  if [ $role = 'server' ]; then configure_networking_server; create_user; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps "/opt/securestack/securestack.yml"
     ;;
