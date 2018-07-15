@@ -18,6 +18,4 @@ local_net: '172.31.0.0/16'
 ossec_server_ip: '172.31.0.50'
 
 ### Add your IP addresses to whitelist here ###
-whitelist:
-    - 10.0.0.0/24 # Trusted networks
-    - 1.2.3.4 # Public IP of remote office
+whitelist: '10.0.0.0/24 1.2.3.4'
