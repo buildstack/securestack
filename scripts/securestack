@@ -188,8 +188,8 @@ configure_networking_server () {
 	echo "******************************************************************************"
 
 	echo "Writing network values to local_net."
-        sed -i "s/^local_net:.*/local_net: '$local_net'/g" /opt/securestack/securestack.yml
-        sed -i "s/^white_list:.*/white_list: '$white_list'/g" /opt/securestack/securestack.yml
+        sed -i "s#^local_net:.*#local_net: '$local_net'#g" /opt/securestack/securestack.yml
+        sed -i "s#^white_list:.*#white_list: '$white_list'#g" /opt/securestack/securestack.yml
 
 	echo "Allowing access to OSSEC from local_net."
         for subnets in ${local_net[@]}
@@ -234,8 +234,8 @@ configure_networking_base () {
         done
 
         echo "Writing network values to local_net."
-        sed -i "s/^local_net:.*/local_net: '$local_net'/g" /opt/securestack/securestack.yml
-        sed -i "s/^white_list:.*/white_list: '$white_list'/g" /opt/securestack/securestack.yml
+        sed -i "s#^local_net:.*#local_net: '$local_net'#g" /opt/securestack/securestack.yml
+        sed -i "s#^white_list:.*#white_list: '$white_list'#g" /opt/securestack/securestack.yml
 
         echo "******************************************************************************"
         echo "Removing inital ssh rule..."
