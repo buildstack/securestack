@@ -187,6 +187,9 @@ configure_networking_server () {
 	sudo ufw --force enable
 	echo "******************************************************************************"
 
+        sed -i "s/^local_net:.*/local_net: '$local_net'/g" /opt/securestack.yml
+        sed -i "s/^white_list:.*/white_list: '$white_list'/g" /opt/securestack.yml
+
         for subnets in ${local_net[@]}
         do
                 sudo ufw allow proto tcp from $subnets to any port 1514
