@@ -227,10 +227,15 @@ configure_networking_base () {
         sudo ufw --force enable
         echo "******************************************************************************"
 
+	echo "Allowing ssh from white_list."
         for ip in ${white_list[@]}
         do
                 sudo ufw allow proto tcp from $ip to any port 22
         done
+
+        echo "Writing network values to local_net."
+        sed -i "s/^local_net:.*/local_net: '$local_net'/g" /opt/securestack.yml
+        sed -i "s/^white_list:.*/white_list: '$white_list'/g" /opt/securestack.yml
 
         echo "******************************************************************************"
         echo "Removing inital ssh rule..."
