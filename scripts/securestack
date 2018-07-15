@@ -245,6 +245,33 @@ configure_networking_base () {
         echo "******************************************************************************"
 }
 
+configure_networking_profile () {
+        echo "******************************************************************************"
+        echo "############ local_net section #######################################"
+        echo "What subnets do you want to have access to this SecureStack server?"
+        echo "If you are deploying to AWS this is usually the main IPv4 CIDR block attached to your VPC"
+        echo "or you can specify individual subnets but this will limit what instances can talk to this"
+        echo "SecureStack server."
+        echo "Please include all networks that will be managed by this particular instance of SecureStack."
+        echo "Enter subnets here:  "; read -a local_net
+        echo "******************************************************************************"
+        echo "############ white_list section ######################################"
+        echo "This is where you define what IP addresses or networks you want to have administrative"
+        echo "access to this SecureStack server.  This access is limited to"
+        echo "tcp 22 for ssh.  Please be careful as you can lock yourself out of your server if you"
+        echo "enter the wrong values here.  You can cancel by hitting Ctrl-C now which will leave ssh"
+        echo "open but you won't be able to use the web UI until you define this access."
+        echo "---- Hit Ctrl-C now to exit or any key to continue -------------------"; read
+        echo "Define your whitelist ips here: "; read -a white_list
+        echo "******************************************************************************"
+
+        echo "Writing ${local_net[@]} to local_net in $1"
+        sed -i "s#^local_net:.*#local_net: '$(echo ${local_net[@]})'#g" $1
+        echo "Writing ${white_list[@]} to white_list in $1"
+        sed -i "s#^white_list:.*#white_list: '$(echo ${white_list[@]})'#g" $1
+
+}
+
 create_user () {
 	read -p "Do you want to create a new user for the web ui? [y/N] : " nginx_create
         case "$nginx_create" in
@@ -338,8 +365,9 @@ profile() {
 			if [ -f $sshome/profiles/$3.profile.yml ]; then echo "That profile already exists."; exit 0; fi
 			cp $sshome/profiles/example.profile.yml $sshome/profiles/$3.profile.yml
 			#sed -i "s/^profile_name:.*/profile_name: '$3'/g" 
-			sed -i '/---/a profile_name: $3' ./profiles/$3.profile.yml
+			sed -i "/---/a profile_name: $3" ./profiles/$3.profile.yml
 			configure_apps $sshome/profiles/$3.profile.yml
+			configure_networking_profile $sshome/profiles/$3.profile.yml
 			;;
                 [lL][iI][sS][tT]|[lL])
 			grep -s "profile_name: " $sshome/profiles/*.profile.yml | awk '{print $2}'
@@ -562,6 +590,8 @@ help)  help
 stop)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi
     ;;
 start)  start $@
+    ;;
+restart)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi; start $@
     ;;
 configure)  if [ $role = 'server' ]; then configure_networking_server; create_user; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps "/opt/securestack/securestack.yml"
     ;;
