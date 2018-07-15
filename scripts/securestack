@@ -103,7 +103,7 @@ start () {
                         else echo "Disabling Filebeat..." && sudo systemctl stop filebeat && sudo systemctl disable filebeat
                         fi
 		
-	elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 naked) -eq 1 ]; then
+	elif [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ]; then
         	echo "SecureStack Role is NAKED"
         	echo "Not doing anything."
 	fi
@@ -188,8 +188,8 @@ configure_networking_server () {
 	echo "******************************************************************************"
 
 	echo "Writing network values to local_net."
-        sed -i "s/^local_net:.*/local_net: '$local_net'/g" /opt/securestack.yml
-        sed -i "s/^white_list:.*/white_list: '$white_list'/g" /opt/securestack.yml
+        sed -i "s/^local_net:.*/local_net: '$local_net'/g" /opt/securestack/securestack.yml
+        sed -i "s/^white_list:.*/white_list: '$white_list'/g" /opt/securestack/securestack.yml
 
 	echo "Allowing access to OSSEC from local_net."
         for subnets in ${local_net[@]}
@@ -234,8 +234,8 @@ configure_networking_base () {
         done
 
         echo "Writing network values to local_net."
-        sed -i "s/^local_net:.*/local_net: '$local_net'/g" /opt/securestack.yml
-        sed -i "s/^white_list:.*/white_list: '$white_list'/g" /opt/securestack.yml
+        sed -i "s/^local_net:.*/local_net: '$local_net'/g" /opt/securestack/securestack.yml
+        sed -i "s/^white_list:.*/white_list: '$white_list'/g" /opt/securestack/securestack.yml
 
         echo "******************************************************************************"
         echo "Removing inital ssh rule..."
@@ -539,12 +539,12 @@ elif [ -f /etc/redhat-release ]; then os_ver=$(awk '{print $1}' /etc/redhat-rele
 elif [ -f /etc/debian-version ]; then os_ver=Ubuntu;
 fi
 	
-# Find securestack_role from securstack.yml file
-if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ];
+# Find securestack_role from /etc/securestack.conf file
+if [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ];
         then role='server';
-elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 hardened) -eq 1 ];
+elif [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ];
         then role='hardened';
-elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 naked) -eq 1 ];
+elif [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ];
         then role='naked';
 else role='hardened';
 fi
