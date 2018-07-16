@@ -237,17 +237,25 @@ firewall () {
         sudo ufw --force enable
         echo "******************************************************************************"
 
-        for subnets in ${localnet_arr[@]}
-        do
-                sudo ufw allow proto tcp from $subnets to any port 1514
-                sudo ufw allow proto tcp from $subnets to any port 1515
-        done
+        if [[ $securestack_role = 'server' ]];then
+		for subnets in ${localnet_arr[@]}
+        	do
+                	sudo ufw allow proto tcp from $subnets to any port 1514
+                	sudo ufw allow proto tcp from $subnets to any port 1515
+        	done
 
-	for ip in ${whitelist_arr[@]}
-	do
-		sudo ufw allow proto tcp from $ip to any port 22
-		sudo ufw allow proto tcp from $ip to any port 80
-	done
+		for ip in ${whitelist_arr[@]}
+		do
+			sudo ufw allow proto tcp from $ip to any port 22
+			sudo ufw allow proto tcp from $ip to any port 80
+		done
+
+	elif [[ $securestack_role != 'server' ]];then
+		for ip in ${whitelist_arr[@]}
+                do
+                        sudo ufw allow proto tcp from $ip to any port 22
+                done
+	fi
 
         echo "******************************************************************************"
         echo "Removing inital ssh rule..."
@@ -287,6 +295,8 @@ configure_networking_base () {
         echo "Removing inital ssh rule..."
         #sudo ufw --force delete 1
         echo "******************************************************************************"
+
+	firewall
 }
 
 configure_networking_profile () {
