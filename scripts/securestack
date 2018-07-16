@@ -114,11 +114,11 @@ agent () {
         case "$2" in
                 [lL][iI][sS][tT]|[lL])
                         echo "Listing all SecureStack agents... "
-                        sudo /var/ossec/bin/agent_control -l
+                        sudo /var/ossec/bin/agent_control -l | grep -v "Wazuh agent_control"
                         ;;
                 [aA][cC][tT][iI][vV][eE]|[aA])
                         echo "Listing all SecureStack active agents... "
-                        sudo /var/ossec/bin/agent_control -lc
+                        sudo /var/ossec/bin/agent_control -lc | grep -v "Wazuh agent_control"
                         ;;
                 [iI][nN][fF][oO]|[iI])
 			if [[ $3 -ge 1 ]]; then
@@ -155,8 +155,17 @@ agent () {
                                 exit 0;
                         fi
                         ;;
+                [uU][pP][dD][aA][tT][eE]|[uU])
+			if [ $3 = 'all' ]; then echo "Updating all machines...";
+				for i in $(sudo /var/ossec/bin/agent_control -lc | grep -v 127.0.0.1 | grep -o "IP:.*"|awk '{print $2}'|tr -d ,); 
+					do ssh -o StrictHostKeyChecking=no $i "$sshome/scripts/securestack update";
+				done;
+				exit 0;
+			fi
+			ssh -o StrictHostKeyChecking=no $3 "$sshome/scripts/securestack update"
+                        ;;
                 *)
-                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info)"; exit 0
+                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info|update)"; exit 0
                         ;;
         esac
 
