@@ -102,6 +102,10 @@ start () {
                                 echo "Enabling Filebeat..." && sudo systemctl start filebeat && sudo systemctl enable filebeat
                         else echo "Disabling Filebeat..." && sudo systemctl stop filebeat && sudo systemctl disable filebeat
                         fi
+                        if [ $(grep 'rkhunter:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+                                echo "Enabling Rootkit Hunter..." && sudo chmod a+x /etc/cron.daily/rkhunter
+                        else echo "Disabling Rootkit Hunter..." && sudo chmod a-x /etc/cron.daily/rkhunter
+                        fi
 		
 	elif [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ]; then
         	echo "SecureStack Role is NAKED"
@@ -302,11 +306,11 @@ configure_apps () {
 	echo "******************************************************************************"
     	read -p "Do you want to enable clamav anti-virus?  [y/N] : " clamav_ans
         read -p "Do you want to enable Linux Malware Detect (LMD/maldet)?  [y/N] : " maldet_ans
-        read -p "Do you want to enable fail2ban?  [Y/n] : " fail2ban_ans
-        if [ $securestack_role != 'server' ]; then read -p "Do you want to enable Metricbeat?  [y/N] : " metricbeat_ans; fi
-        if [ $securestack_role != 'server' ]; then read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans; fi
+        read -p "Do you want to enable fail2ban?  [y/N] : " fail2ban_ans
+        if [[ $securestack_role != 'server' ]]; then read -p "Do you want to enable Metricbeat?  [y/N] : " metricbeat_ans; fi
+        if [[ $securestack_role != 'server' ]]; then read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans; fi
 	#read -p "Do you want to enable Web Application Firewall? [y/N] " waf_ans
-	#read -p "Do you want to enable Rootkit Hunter? [Y/n] " rkhunter_ans
+	read -p "Do you want to enable Rootkit Hunter? [y/N] " rkhunter_ans
 	echo "******************************************************************************"
 	# clamav section
 	case "$clamav_ans" in
@@ -357,9 +361,19 @@ configure_apps () {
                         sed -i "s/^filebeat:.*/filebeat: 'disabled'/g" $1
                         ;;
         esac
+
+        # rkhunter section
+        case "$rkhunter_ans" in
+                [yY][eE][sS]|[yY])
+                        sed -i "s/^rkhunter:.*/rkhunter: 'enabled'/g" $1
+                        ;;
+                *)
+                        sed -i "s/^rkhunter:.*/rkhunter: 'disabled'/g" $1
+                        ;;
+        esac
 	
-	if [ $securestack_role = 'server' ]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" $1; fi
-	if [ $securestack_role = 'server' ]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" $1; fi
+	if [[ $securestack_role = 'server' ]]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" $1; fi
+	if [[ $securestack_role = 'server' ]]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" $1; fi
 	
 		
 }
