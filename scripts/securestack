@@ -194,74 +194,13 @@ configure_networking_server () {
 	echo "open but you won't be able to use the web UI until you define this access."
 	echo "---- Hit Ctrl-C now to exit or any key to continue -------------------"; read 
         echo "Define your whitelist ips here: "; read -a white_list
-	echo "******************************************************************************"
-	echo "Deleting existing firewall rules..."
-	#sudo ufw --force reset
-	#sudo ufw --force enable
-	echo "******************************************************************************"
 
 	echo "Writing ${local_net[@]} to local_net in $sshome/securestack.yml."
         sed -i "s#^local_net:.*#local_net: '$(echo ${local_net[@]})'#g" /opt/securestack/securestack.yml
 	echo "Writing ${white_list[@]} to white_list in $sshome/securestack.yml."
 	sed -i "s#^white_list:.*#white_list: '$(echo ${white_list[@]})'#g" /opt/securestack/securestack.yml
 
-	echo "Allowing access to OSSEC from local_net."
-        #for subnets in ${local_net[@]}
-        #do
-        #        sudo ufw allow proto tcp from $subnets to any port 1514
-        #        sudo ufw allow proto tcp from $subnets to any port 1515
-        #done
-
-	echo "Allowing ssh and http from white_list."
-	#for ip in ${white_list[@]}
-	#do
-  	#	sudo ufw allow proto tcp from $ip to any port 22
-  	#	sudo ufw allow proto tcp from $ip to any port 80
-	#done
-
-	#echo "******************************************************************************"
-	#echo "Removing inital ssh rule..."
-	#sudo ufw --force delete 1
-	#echo "******************************************************************************"
-
 	firewall
-}
-
-firewall () {
-	whitelist_arr=$(grep white_list ./securestack.yml | sed 's/^.*: //'| sed "s/'//g")
-	localnet_arr=$(grep local_net ./securestack.yml | sed 's/^.*: //'| sed "s/'//g")
-
-        echo "******************************************************************************"
-        echo "Deleting existing firewall rules..."
-        sudo ufw --force reset
-        sudo ufw --force enable
-        echo "******************************************************************************"
-
-        if [[ $securestack_role = 'server' ]];then
-		for subnets in ${localnet_arr[@]}
-        	do
-                	sudo ufw allow proto tcp from $subnets to any port 1514
-                	sudo ufw allow proto tcp from $subnets to any port 1515
-        	done
-
-		for ip in ${whitelist_arr[@]}
-		do
-			sudo ufw allow proto tcp from $ip to any port 22
-			sudo ufw allow proto tcp from $ip to any port 80
-		done
-
-	elif [[ $securestack_role != 'server' ]];then
-		for ip in ${whitelist_arr[@]}
-                do
-                        sudo ufw allow proto tcp from $ip to any port 22
-                done
-	fi
-
-        echo "******************************************************************************"
-        echo "Removing inital ssh rule..."
-        sudo ufw --force delete 1
-        echo "******************************************************************************"
-
 }
 
 configure_networking_base () {
@@ -274,27 +213,11 @@ configure_networking_base () {
         echo "open but you won't be able to use the web UI until you define this access."
         echo "---- Hit Ctrl-C now to exit or any key to continue -------------------"; read
         echo "Define your whitelist ips here: "; read -a white_list
-        echo "******************************************************************************"
-        echo "Deleting existing firewall rules..."
-        #sudo ufw --force reset
-        #sudo ufw --force enable
-        echo "******************************************************************************"
-
-	echo "Allowing ssh from white_list."
-        #for ip in ${white_list[@]}
-        #do
-        #        sudo ufw allow proto tcp from $ip to any port 22
-        #done
 
         #echo "Writing ${local_net[@]} to local_net in $sshome/securestack.yml."
         #sed -i "s#^local_net:.*#local_net: '$(echo ${local_net[@]})'#g" /opt/securestack/securestack.yml
         echo "Writing ${white_list[@]} to white_list in $sshome/securestack.yml."
 	sed -i "s#^white_list:.*#white_list: '$(echo ${white_list[@]})'#g" /opt/securestack/securestack.yml
-
-        echo "******************************************************************************"
-        echo "Removing inital ssh rule..."
-        #sudo ufw --force delete 1
-        echo "******************************************************************************"
 
 	firewall
 }
@@ -323,6 +246,46 @@ configure_networking_profile () {
         sed -i "s#^local_net:.*#local_net: '$(echo ${local_net[@]})'#g" $1
         echo "Writing ${white_list[@]} to white_list in $1"
         sed -i "s#^white_list:.*#white_list: '$(echo ${white_list[@]})'#g" $1
+
+}
+
+firewall () {
+        whitelist_arr=$(grep white_list ./securestack.yml | sed 's/^.*: //'| sed "s/'//g")
+        localnet_arr=$(grep local_net ./securestack.yml | sed 's/^.*: //'| sed "s/'//g")
+
+        echo "******************************************************************************"
+        echo "Deleting existing firewall rules..."
+        sudo ufw --force reset
+        sudo ufw --force enable
+        echo "******************************************************************************"
+
+        if [[ $securestack_role = 'server' ]];then
+                echo "Allowing access to OSSEC from local_net.";
+                for subnets in ${localnet_arr[@]}
+                do
+                        sudo ufw allow proto tcp from $subnets to any port 1514
+                        sudo ufw allow proto tcp from $subnets to any port 1515
+                done
+
+                echo "Allowing ssh and http from white_list."
+                for ip in ${whitelist_arr[@]}
+                do
+                        sudo ufw allow proto tcp from $ip to any port 22
+                        sudo ufw allow proto tcp from $ip to any port 80
+                done
+
+        elif [[ $securestack_role != 'server' ]];then
+                echo "Allowing ssh from white_list."
+                for ip in ${whitelist_arr[@]}
+                do
+                        sudo ufw allow proto tcp from $ip to any port 22
+                done
+        fi
+
+        echo "******************************************************************************"
+        echo "Removing inital ssh rule..."
+        sudo ufw --force delete 1
+        echo "******************************************************************************"
 
 }
 
