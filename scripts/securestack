@@ -73,7 +73,7 @@ start () {
         echo "============================================================================================================================================"
         echo " "
         echo "If you've allowed http access to the internet you can login to the SecureStack Web UI at http://$(curl -s icanhazip.com)"
-        echo "Otherwise you can login to the SecureStack Web UI at http://$(ifconfig eth0|grep inet|awk '{print $2}')"
+        echo "Otherwise you can login to the SecureStack Web UI at http://$(hostname -I)"
         echo " "
         echo "============================================================================================================================================"
 
