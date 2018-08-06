@@ -1,15 +1,15 @@
 ### This role works for brand new instances with no OSSEC or Wazuh installs.  It also works for existing SecureStack Base instances.  ###
 
 ---
-- name: Copy default wazuh repo file
-  copy:
-    src: wazuh.repo
-    dest: /etc/yum.repos.d/
-  when: ansible_os_family == "RedHat"
+#- name: Copy default wazuh repo file
+#  copy:
+#    src: wazuh.repo
+#    dest: /etc/yum.repos.d/
+#  when: ansible_os_family == "RedHat"
 
-- name: Install wazuh ossec agent
-  action: yum pkg=wazuh-agent state=latest
-  when: ansible_os_family == "RedHat"
+#- name: Install wazuh ossec agent
+#  action: yum pkg=wazuh-agent state=latest
+#  when: ansible_os_family == "RedHat"
 
 - name: Copy ossec.conf template
   template:
