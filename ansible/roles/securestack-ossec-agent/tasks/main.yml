@@ -5,9 +5,11 @@
   copy:
     src: wazuh.repo
     dest: /etc/yum.repos.d/
+  when: ansible_os_family == "RedHat"
 
 - name: Install wazuh ossec agent
   action: yum pkg=wazuh-agent state=latest
+  when: ansible_os_family == "RedHat"
 
 - name: Copy ossec.conf template
   template:

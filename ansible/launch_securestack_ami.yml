@@ -63,6 +63,7 @@
         name: '*'
         enablerepo: base,epel,extras,updates
         state: latest
+      when: ansible_os_family == "RedHat"
 
     - name: Run securestack update script
       shell: /opt/securestack/scripts/securestack update
