@@ -250,8 +250,8 @@ configure_networking_profile () {
 }
 
 firewall () {
-        whitelist_arr=$(grep white_list ./securestack.yml | sed 's/^.*: //'| sed "s/'//g")
-        localnet_arr=$(grep local_net ./securestack.yml | sed 's/^.*: //'| sed "s/'//g")
+        whitelist_arr=$(grep ^white_list $sshome/securestack.yml | sed 's/^.*: //'| sed "s/'//g")
+        localnet_arr=$(grep ^local_net $sshome/securestack.yml | sed 's/^.*: //'| sed "s/'//g")
 
         echo "******************************************************************************"
         echo "Deleting existing firewall rules..."
@@ -588,7 +588,7 @@ if [ -f /var/log/lynis.log ]; then sudo grep -o "Hardening index.*" /var/log/lyn
 
 
 # Variables go here #
-sshome=/opt/securestack/
+sshome=/opt/securestack
 
 # Find version of operating system
 if hash lsb_release 2>/dev/null; then
