@@ -52,7 +52,7 @@ stop_el () {
 }
 
 start () {
-	if [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ]; then
+	if [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ]; then
 		echo "SecureStack Role is SERVER"
 		echo "Starting Wazuh, Elasticsearch, Logstash, Kibana, Filebeat and Metricbeat"
         	sudo systemctl start wazuh-manager && sudo systemctl enable wazuh-manager
@@ -77,7 +77,7 @@ start () {
         echo " "
         echo "============================================================================================================================================"
 
-	elif [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ]; then
+	elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ]; then
 		echo "SecureStack Role is HARDENED"
 		echo "Starting wazuh-agent..."; sudo systemctl start wazuh-agent && sudo systemctl enable wazuh-agent
 			if [ $(grep 'fail2ban:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
@@ -107,7 +107,7 @@ start () {
                         else echo "Disabling Rootkit Hunter..." && sudo chmod a-x /etc/cron.daily/rkhunter
                         fi
 		
-	elif [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ]; then
+	elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ]; then
         	echo "SecureStack Role is NAKED"
         	echo "Not doing anything."
 	fi
@@ -598,11 +598,11 @@ elif [ -f /etc/debian-version ]; then os_ver=Ubuntu;
 fi
 	
 # Find securestack_role from /etc/securestack.conf file
-if [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ];
+if [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ];
         then role='server';
-elif [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ];
+elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ];
         then role='hardened';
-elif [ $(grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ];
+elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ];
         then role='naked';
 else role='hardened';
 fi
