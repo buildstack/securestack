@@ -259,7 +259,7 @@ firewall () {
         sudo ufw --force enable
         echo "******************************************************************************"
 
-        if [[ $securestack_role = 'server' ]];then
+        if [[ $SECURESTACK_ROLE = 'server' ]];then
                 echo "Allowing access to OSSEC from local_net.";
                 for subnets in ${localnet_arr[@]}
                 do
@@ -274,7 +274,7 @@ firewall () {
                         sudo ufw allow proto tcp from $ip to any port 80
                 done
 
-        elif [[ $securestack_role != 'server' ]];then
+        elif [[ $SECURESTACK_ROLE != 'server' ]];then
                 echo "Allowing ssh from white_list."
                 for ip in ${whitelist_arr[@]}
                 do
@@ -311,8 +311,8 @@ configure_apps () {
     	read -p "Do you want to enable clamav anti-virus?  [y/N] : " clamav_ans
         read -p "Do you want to enable Linux Malware Detect (LMD/maldet)?  [y/N] : " maldet_ans
         read -p "Do you want to enable fail2ban?  [y/N] : " fail2ban_ans
-        if [[ $securestack_role != 'server' ]]; then read -p "Do you want to enable Metricbeat?  [y/N] : " metricbeat_ans; fi
-        if [[ $securestack_role != 'server' ]]; then read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans; fi
+        if [[ $SECURESTACK_ROLE != 'server' ]]; then read -p "Do you want to enable Metricbeat?  [y/N] : " metricbeat_ans; fi
+        if [[ $SECURESTACK_ROLE != 'server' ]]; then read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans; fi
 	#read -p "Do you want to enable Web Application Firewall? [y/N] " waf_ans
 	read -p "Do you want to enable Rootkit Hunter? [y/N] " rkhunter_ans
 	echo "******************************************************************************"
@@ -376,8 +376,8 @@ configure_apps () {
                         ;;
         esac
 	
-	if [[ $securestack_role = 'server' ]]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" $1; fi
-	if [[ $securestack_role = 'server' ]]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" $1; fi
+	if [[ $SECURESTACK_ROLE = 'server' ]]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" $1; fi
+	if [[ $SECURESTACK_ROLE = 'server' ]]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" $1; fi
 	
 		
 }
@@ -494,8 +494,8 @@ mfa() {
 
 update_el () {
 	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
-	if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
-	if [ $role = 'server' ]; then 
+	if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
+	if [ $SECURESTACK_ROLE = 'server' ]; then 
 		grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null' >> /opt/securestack/.bash_profile;
 		source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null;
 	fi
@@ -521,8 +521,8 @@ update_el () {
 
 update_ubuntu () {
         if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
-        if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
-        if [ $role = 'server' ]; then
+        if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
+        if [ $SECURESTACK_ROLE = 'server' ]; then
                 grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup' >> /opt/securestack/.bash_profile;
                 source /opt/securestack/bin/ansible/hacking/env-setup;
         fi
@@ -597,14 +597,14 @@ elif [ -f /etc/redhat-release ]; then os_ver=$(awk '{print $1}' /etc/redhat-rele
 elif [ -f /etc/debian-version ]; then os_ver=Ubuntu;
 fi
 	
-# Find securestack_role from /etc/securestack.conf file
+# Find SECURESTACK_ROLE from /etc/securestack.conf file
 if [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ];
-        then role='server';
+        then SECURESTACK_ROLE='server';
 elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ];
-        then role='hardened';
+        then SECURESTACK_ROLE='hardened';
 elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ];
-        then role='naked';
-else role='hardened';
+        then SECURESTACK_ROLE='naked';
+else SECURESTACK_ROLE='hardened';
 fi
 
 # Make sure $sshome is owned by securestack:securestack and /etc/securestack.conf
@@ -620,9 +620,9 @@ start)  start $@
     ;;
 restart)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi; echo "Pausing momentarily..."; sleep 20; start $@
     ;;
-configure)  if [ $role = 'server' ]; then configure_networking_server; create_user; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps "/opt/securestack/securestack.yml"
+configure)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; create_user; elif [ $SECURESTACK_ROLE = 'hardened' ]; then configure_networking_base;fi; configure_apps "/opt/securestack/securestack.yml"
     ;;
-configure_network)  if [ $role = 'server' ]; then configure_networking_server; else configure_networking_base;fi
+configure_network)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; else configure_networking_base;fi
     ;;
 configure_apps)  configure_apps "/opt/securestack/securestack.yml"
     ;;
