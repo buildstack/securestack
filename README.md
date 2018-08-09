@@ -8,7 +8,7 @@ SecureStack Base is intended to be the foundation you build all your AWS infrast
 
 SecureStack helps you meet your audit and compliance needs with multiple tools integrated into both Server and Base versions.  All SecureStack Base instances will report their compliance and audit data directly to their SecureStack Server controller.  SecureStack currently has modules for: PCI-DSS, OWASP, SCAP, and CIS.   
 
-### SecureStack SIPS ###
+### SecureStack SIPServer ###
 SecureStack Security Intelligence Platform Server (SIPS) is your central management system that ties all your Base machines together.  SecureStack Server is a log collection, aggregation and analysis solution.  It's also a complete SIEM solution with real-time dashboards, custom visualizations and dashboards, event correlation, history and backup.  SecureStack Base instances talk to a SecureStack Server instance via an encrypted connection.  Events are passed in real-time so if an instance is compromised a hacker can't edit their history and make it disappear.  SecureStack Server already has the message and has alerted you to their presence.  SecureStack Server supports active response too.  If it sees an attack it can mitigate it with an automated response.  SecureStack Server also supports scheduled compliance checks.  Currently there are modules for: PCI-DSS, OWASP, SCAP, and CIS.   
 
 ### SecureStack Components ###
@@ -130,8 +130,8 @@ Once you've run the configuration wizard you can start the SecureStack engine: `
 
 SecureStack Base is all ready to go now!  You can build whatever you want to using your SecureStack Base instances.
 
-#### SecureStack Server Web UI ####
-SecureStack Server comes with a full featured web based SIEM and you should now be able to use the web ui.  In a browser you can open http://server_address_here to see the SecureStack Server UI.  During the configuration you would have had the opportunity to create a user and password for the the web ui.  When you are prompted for the username and password enter it.  In a browser you can open http://server_address_here to see the SecureStack Server UI.  If you can't connect, verify that your AWS security groups allow access to http (tcp 80). You can watch this [video to learn more about our SIEM] (https://youtu.be/oaBxbiCv1UU "Introduction to SecureStack SIEM")
+#### SecureStack SIPServer Web UI ####
+SecureStack Server comes with a full featured web based SIEM and you should now be able to use the web ui.  At the end of the configuration process the securestack script will show you the url to use to connect to the SIPServer web ui.  process you would have had the opportunity to create a user and password for the the web ui.  When you are prompted for the username and password enter it.  In a browser you can open http://server_address_here to see the SecureStack Server UI.  If you can't connect, verify that your AWS security groups allow access to http (tcp 80). You can watch this [video to learn more about our SIEM] (https://youtu.be/oaBxbiCv1UU "Introduction to SecureStack SIEM")
 
 During the configuration you would have had the opportunity to create a user and password for the the web ui. 
 
