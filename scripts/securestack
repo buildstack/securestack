@@ -416,6 +416,10 @@ profile() {
 			scp $sshome/profiles/$3.profile.yml securestack@$4:$sshome/securestack.yml
 			ssh $4 "$sshome/scripts/securestack restart"
 			;;
+		[nN][eE][wW]|[nN])
+               		echo "You are creating a new profile"
+                        read -p "Which provider? Choices are: ec2, gce, azure, ali, vmware.  " provider_ans
+			;;
                 *)
                         echo "Must supply verb.  Example:  securestack profile (create|remove|apply|show|list)"; exit 0
 			;;
