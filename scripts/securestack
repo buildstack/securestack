@@ -52,7 +52,7 @@ stop_el () {
 }
 
 start () {
-	if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ]; then
+	if [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ]; then
 		echo "SecureStack Role is SERVER"
 		echo "Starting Wazuh, Elasticsearch, Logstash, Kibana, Filebeat and Metricbeat"
         	sudo systemctl start wazuh-manager && sudo systemctl enable wazuh-manager
@@ -73,11 +73,11 @@ start () {
         echo "============================================================================================================================================"
         echo " "
         echo "If you've allowed http access to the internet you can login to the SecureStack Web UI at http://$(curl -s icanhazip.com)"
-        echo "Otherwise you can login to the SecureStack Web UI at http://$(ifconfig eth0|grep inet|awk '{print $2}')"
+        echo "Otherwise you can login to the SecureStack Web UI at http://$(hostname -I)"
         echo " "
         echo "============================================================================================================================================"
 
-	elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 hardened) -eq 1 ]; then
+	elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ]; then
 		echo "SecureStack Role is HARDENED"
 		echo "Starting wazuh-agent..."; sudo systemctl start wazuh-agent && sudo systemctl enable wazuh-agent
 			if [ $(grep 'fail2ban:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
@@ -102,8 +102,12 @@ start () {
                                 echo "Enabling Filebeat..." && sudo systemctl start filebeat && sudo systemctl enable filebeat
                         else echo "Disabling Filebeat..." && sudo systemctl stop filebeat && sudo systemctl disable filebeat
                         fi
+                        if [ $(grep 'rkhunter:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+                                echo "Enabling Rootkit Hunter..." && sudo chmod a+x /etc/cron.daily/rkhunter
+                        else echo "Disabling Rootkit Hunter..." && sudo chmod a-x /etc/cron.daily/rkhunter
+                        fi
 		
-	elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 naked) -eq 1 ]; then
+	elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ]; then
         	echo "SecureStack Role is NAKED"
         	echo "Not doing anything."
 	fi
@@ -114,11 +118,11 @@ agent () {
         case "$2" in
                 [lL][iI][sS][tT]|[lL])
                         echo "Listing all SecureStack agents... "
-                        sudo /var/ossec/bin/agent_control -l
+                        sudo /var/ossec/bin/agent_control -l | grep -v "Wazuh agent_control"
                         ;;
                 [aA][cC][tT][iI][vV][eE]|[aA])
                         echo "Listing all SecureStack active agents... "
-                        sudo /var/ossec/bin/agent_control -lc
+                        sudo /var/ossec/bin/agent_control -lc | grep -v "Wazuh agent_control"
                         ;;
                 [iI][nN][fF][oO]|[iI])
 			if [[ $3 -ge 1 ]]; then
@@ -155,8 +159,17 @@ agent () {
                                 exit 0;
                         fi
                         ;;
+                [uU][pP][dD][aA][tT][eE]|[uU])
+			if [ -z $3 ]; then echo "Must supply target.  Example:  securestack agent update 10.0.0.100"; exit 0; fi
+			if [ $3 = 'all' ]; then echo "Updating all machines...";
+				for i in $(sudo /var/ossec/bin/agent_control -lc | grep -v 127.0.0.1 | grep -o "IP:.*"|awk '{print $2}'|tr -d ,); 
+					do ssh -o StrictHostKeyChecking=no $i "$sshome/scripts/securestack update";
+				done;
+			else ssh -o StrictHostKeyChecking=no $3 "$sshome/scripts/securestack update"
+			fi
+                        ;;
                 *)
-                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info)"; exit 0
+                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info|update)"; exit 0
                         ;;
         esac
 
@@ -181,28 +194,13 @@ configure_networking_server () {
 	echo "open but you won't be able to use the web UI until you define this access."
 	echo "---- Hit Ctrl-C now to exit or any key to continue -------------------"; read 
         echo "Define your whitelist ips here: "; read -a white_list
-	echo "******************************************************************************"
-	echo "Deleting existing firewall rules..."
-	sudo ufw --force reset
-	sudo ufw --force enable
-	echo "******************************************************************************"
 
-        for subnets in ${local_net[@]}
-        do
-                sudo ufw allow proto tcp from $subnets to any port 1514
-                sudo ufw allow proto tcp from $subnets to any port 1515
-        done
+	echo "Writing ${local_net[@]} to local_net in $sshome/securestack.yml."
+        sed -i "s#^local_net:.*#local_net: '$(echo ${local_net[@]})'#g" /opt/securestack/securestack.yml
+	echo "Writing ${white_list[@]} to white_list in $sshome/securestack.yml."
+	sed -i "s#^white_list:.*#white_list: '$(echo ${white_list[@]})'#g" /opt/securestack/securestack.yml
 
-	for ip in ${white_list[@]}
-	do
-  		sudo ufw allow proto tcp from $ip to any port 22
-  		sudo ufw allow proto tcp from $ip to any port 80
-	done
-
-	echo "******************************************************************************"
-	echo "Removing inital ssh rule..."
-	sudo ufw --force delete 1
-	echo "******************************************************************************"
+	firewall
 }
 
 configure_networking_base () {
@@ -215,21 +213,80 @@ configure_networking_base () {
         echo "open but you won't be able to use the web UI until you define this access."
         echo "---- Hit Ctrl-C now to exit or any key to continue -------------------"; read
         echo "Define your whitelist ips here: "; read -a white_list
+
+        #echo "Writing ${local_net[@]} to local_net in $sshome/securestack.yml."
+        #sed -i "s#^local_net:.*#local_net: '$(echo ${local_net[@]})'#g" /opt/securestack/securestack.yml
+        echo "Writing ${white_list[@]} to white_list in $sshome/securestack.yml."
+	sed -i "s#^white_list:.*#white_list: '$(echo ${white_list[@]})'#g" /opt/securestack/securestack.yml
+
+	firewall
+}
+
+configure_networking_profile () {
+        echo "******************************************************************************"
+        echo "############ local_net section #######################################"
+        echo "What subnets do you want to have access to this SecureStack server?"
+        echo "If you are deploying to AWS this is usually the main IPv4 CIDR block attached to your VPC"
+        echo "or you can specify individual subnets but this will limit what instances can talk to this"
+        echo "SecureStack server."
+        echo "Please include all networks that will be managed by this particular instance of SecureStack."
+        echo "Enter subnets here:  "; read -a local_net
+        echo "******************************************************************************"
+        echo "############ white_list section ######################################"
+        echo "This is where you define what IP addresses or networks you want to have administrative"
+        echo "access to this SecureStack server.  This access is limited to"
+        echo "tcp 22 for ssh.  Please be careful as you can lock yourself out of your server if you"
+        echo "enter the wrong values here.  You can cancel by hitting Ctrl-C now which will leave ssh"
+        echo "open but you won't be able to use the web UI until you define this access."
+        echo "---- Hit Ctrl-C now to exit or any key to continue -------------------"; read
+        echo "Define your whitelist ips here: "; read -a white_list
+        echo "******************************************************************************"
+
+        echo "Writing ${local_net[@]} to local_net in $1"
+        sed -i "s#^local_net:.*#local_net: '$(echo ${local_net[@]})'#g" $1
+        echo "Writing ${white_list[@]} to white_list in $1"
+        sed -i "s#^white_list:.*#white_list: '$(echo ${white_list[@]})'#g" $1
+
+}
+
+firewall () {
+        whitelist_arr=$(grep ^white_list $sshome/securestack.yml | sed 's/^.*: //'| sed "s/'//g")
+        localnet_arr=$(grep ^local_net $sshome/securestack.yml | sed 's/^.*: //'| sed "s/'//g")
+
         echo "******************************************************************************"
         echo "Deleting existing firewall rules..."
         sudo ufw --force reset
         sudo ufw --force enable
         echo "******************************************************************************"
 
-        for ip in ${white_list[@]}
-        do
-                sudo ufw allow proto tcp from $ip to any port 22
-        done
+        if [[ $SECURESTACK_ROLE = 'server' ]];then
+                echo "Allowing access to OSSEC from local_net.";
+                for subnets in ${localnet_arr[@]}
+                do
+                        sudo ufw allow proto tcp from $subnets to any port 1514
+                        sudo ufw allow proto tcp from $subnets to any port 1515
+                done
+
+                echo "Allowing ssh and http from white_list."
+                for ip in ${whitelist_arr[@]}
+                do
+                        sudo ufw allow proto tcp from $ip to any port 22
+                        sudo ufw allow proto tcp from $ip to any port 80
+                done
+
+        elif [[ $SECURESTACK_ROLE != 'server' ]];then
+                echo "Allowing ssh from white_list."
+                for ip in ${whitelist_arr[@]}
+                do
+                        sudo ufw allow proto tcp from $ip to any port 22
+                done
+        fi
 
         echo "******************************************************************************"
         echo "Removing inital ssh rule..."
         sudo ufw --force delete 1
         echo "******************************************************************************"
+
 }
 
 create_user () {
@@ -254,64 +311,74 @@ configure_apps () {
 	echo "******************************************************************************"
     	read -p "Do you want to enable clamav anti-virus?  [y/N] : " clamav_ans
         read -p "Do you want to enable Linux Malware Detect (LMD/maldet)?  [y/N] : " maldet_ans
-        read -p "Do you want to enable fail2ban?  [Y/n] : " fail2ban_ans
-        if [ $role != 'server' ]; then read -p "Do you want to enable Metricbeat?  [y/N] : " metricbeat_ans; fi
-        if [ $role != 'server' ]; then read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans; fi
+        read -p "Do you want to enable fail2ban?  [y/N] : " fail2ban_ans
+        if [[ $SECURESTACK_ROLE != 'server' ]]; then read -p "Do you want to enable Metricbeat?  [y/N] : " metricbeat_ans; fi
+        if [[ $SECURESTACK_ROLE != 'server' ]]; then read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans; fi
 	#read -p "Do you want to enable Web Application Firewall? [y/N] " waf_ans
-	#read -p "Do you want to enable Rootkit Hunter? [Y/n] " rkhunter_ans
+	read -p "Do you want to enable Rootkit Hunter? [y/N] " rkhunter_ans
 	echo "******************************************************************************"
 	# clamav section
 	case "$clamav_ans" in
     		[yY][eE][sS]|[yY]) 
-        		sed -i "s/^clamav:.*/clamav: 'enabled'/g" /opt/securestack/securestack.yml
+        		sed -i "s/^clamav:.*/clamav: 'enabled'/g" $1
         		;;
     		*)
-        		sed -i "s/^clamav:.*/clamav: 'disabled'/g" /opt/securestack/securestack.yml
+        		sed -i "s/^clamav:.*/clamav: 'disabled'/g" $1
         		;;
 	esac
 	
 	# maldet section
         case "$maldet_ans" in
                 [yY][eE][sS]|[yY])
-                        sed -i "s/^maldet:.*/maldet: 'enabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^maldet:.*/maldet: 'enabled'/g" $1
                         ;;
                 *)
-                        sed -i "s/^maldet:.*/maldet: 'disabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^maldet:.*/maldet: 'disabled'/g" $1
                         ;;
         esac
 
         # fail2ban section
         case "$fail2ban_ans" in
                 [yY][eE][sS]|[yY])
-                        sed -i "s/^fail2ban:.*/fail2ban: 'enabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^fail2ban:.*/fail2ban: 'enabled'/g" $1
                         ;;
                 *)
-                        sed -i "s/^fail2ban:.*/fail2ban: 'disabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^fail2ban:.*/fail2ban: 'disabled'/g" $1
                         ;;
         esac
 
         # metricbeat section
         case "$metricbeat_ans" in
                 [yY][eE][sS]|[yY])
-                        sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" $1
                         ;;
                 *)
-                        sed -i "s/^metricbeat:.*/metricbeat: 'disabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^metricbeat:.*/metricbeat: 'disabled'/g" $1
                         ;;
         esac
 
 	# filebeat section
         case "$filebeat_ans" in
                 [yY][eE][sS]|[yY])
-                        sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" $1
                         ;;
                 *)
-                        sed -i "s/^filebeat:.*/filebeat: 'disabled'/g" /opt/securestack/securestack.yml
+                        sed -i "s/^filebeat:.*/filebeat: 'disabled'/g" $1
+                        ;;
+        esac
+
+        # rkhunter section
+        case "$rkhunter_ans" in
+                [yY][eE][sS]|[yY])
+                        sed -i "s/^rkhunter:.*/rkhunter: 'enabled'/g" $1
+                        ;;
+                *)
+                        sed -i "s/^rkhunter:.*/rkhunter: 'disabled'/g" $1
                         ;;
         esac
 	
-	if [ $role = 'server' ]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" /opt/securestack/securestack.yml; fi
-	if [ $role = 'server' ]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" /opt/securestack/securestack.yml; fi
+	if [[ $SECURESTACK_ROLE = 'server' ]]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" $1; fi
+	if [[ $SECURESTACK_ROLE = 'server' ]]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" $1; fi
 	
 		
 }
@@ -319,10 +386,43 @@ configure_apps () {
 profile() {
 	export ANSIBLE_HOST_KEY_CHECKING=False
 	case "$2" in
-                [nN][eE][wW]|[nN])
-		echo "You are creating a new profile"
+                [cC][rR][eE][aA][tT][eE]|[cC])
+			if [ -z $3 ]; then echo "Must provide a profile name.  Example: securestack profile create test_profile"; exit 0; fi
+			echo "You are creating a new profile.  This will allow you apply which security applications are running"
+			echo "on individual servers or groups of servers."
+			if [ -f $sshome/profiles/$3.profile.yml ]; then echo "That profile already exists."; exit 0; fi
+			cp $sshome/profiles/example.profile.yml $sshome/profiles/$3.profile.yml
+			#sed -i "s/^profile_name:.*/profile_name: '$3'/g" 
+			sed -i "/---/a profile_name: $3" ./profiles/$3.profile.yml
+			configure_apps $sshome/profiles/$3.profile.yml
+			configure_networking_profile $sshome/profiles/$3.profile.yml
+			;;
+                [lL][iI][sS][tT]|[lL])
+			grep -s "profile_name: " $sshome/profiles/*.profile.yml | awk '{print $2}'
+			;;
+                [sS][hH][oO][wW]|[sS])
+			if [ -z $3 ]; then echo "Must provide a profile name.  Example: securestack profile show test_profile"; exit 0; fi
+			cat $sshome/profiles/$3.profile.yml
+			;;
+                [aA][pP][pP][lL][yY]|[aA])
+			echo "Applying profile..."
+			if [ -z $3 ]; then 
+				echo "Must provide a profile name and target to apply.  Example: securestack profile apply test_profile server01"; 
+				exit 0; 
+			elif [ -z $4 ]; then
+				echo "Must provide a target to apply profile to.  Example: securestack profile apply test_profile server01"; 
+				exit 0; 
+			fi
+			scp $sshome/profiles/$3.profile.yml securestack@$4:$sshome/securestack.yml
+			ssh $4 "$sshome/scripts/securestack restart"
+			;;
+		[nN][eE][wW]|[nN])
+               		echo "You are creating a new profile"
                         read -p "Which provider? Choices are: ec2, gce, azure, ali, vmware.  " provider_ans
-		;;
+			;;
+                *)
+                        echo "Must supply verb.  Example:  securestack profile (create|remove|apply|show|list)"; exit 0
+			;;
 	esac
 }
 
@@ -398,12 +498,12 @@ mfa() {
 }
 
 update_el () {
+	chown -R securestack /opt/securestack;
 	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
-	if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; 
-		then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;
-		     chown -R securestack /opt/securestack/
+	if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then 
+		git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;
 	fi
-	if [ $role = 'server' ]; then 
+	if [ $SECURESTACK_ROLE = 'server' ]; then 
 		grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null' >> /opt/securestack/.bash_profile;
 		source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null;
 	fi
@@ -429,8 +529,8 @@ update_el () {
 
 update_ubuntu () {
         if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
-        if [ $role = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
-        if [ $role = 'server' ]; then
+        if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
+        if [ $SECURESTACK_ROLE = 'server' ]; then
                 grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup' >> /opt/securestack/.bash_profile;
                 source /opt/securestack/bin/ansible/hacking/env-setup;
         fi
@@ -496,7 +596,7 @@ if [ -f /var/log/lynis.log ]; then sudo grep -o "Hardening index.*" /var/log/lyn
 
 
 # Variables go here #
-sshome=/opt/securestack/
+sshome=/opt/securestack
 
 # Find version of operating system
 if hash lsb_release 2>/dev/null; then
@@ -505,15 +605,18 @@ elif [ -f /etc/redhat-release ]; then os_ver=$(awk '{print $1}' /etc/redhat-rele
 elif [ -f /etc/debian-version ]; then os_ver=Ubuntu;
 fi
 	
-# Find securestack_role from securstack.yml file
-if [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 server) -eq 1 ];
-        then role='server';
-elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 hardened) -eq 1 ];
-        then role='hardened';
-elif [ $(grep 'securestack_role:' ./securestack.yml | grep -i -cim1 naked) -eq 1 ];
-        then role='naked';
-else role='hardened';
+# Find SECURESTACK_ROLE from /etc/securestack.conf file
+if [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ];
+        then SECURESTACK_ROLE='server';
+elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ];
+        then SECURESTACK_ROLE='hardened';
+elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ];
+        then SECURESTACK_ROLE='naked';
+else SECURESTACK_ROLE='hardened';
 fi
+
+# Make sure $sshome is owned by securestack:securestack and /etc/securestack.conf
+sudo chown -R securestack:securestack $sshome /etc/securestack.conf
 
 case "$1" in
 
@@ -521,19 +624,23 @@ help)  help
     ;;
 stop)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi
     ;;
-start)  start
+start)  start $@
     ;;
-configure)  if [ $role = 'server' ]; then configure_networking_server; create_user; elif [ $role = 'hardened' ]; then configure_networking_base;fi; configure_apps
+restart)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi; echo "Pausing momentarily..."; sleep 20; start $@
     ;;
-configure_network)  if [ $role = 'server' ]; then configure_networking_server; else configure_networking_base;fi
+configure)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; create_user; elif [ $SECURESTACK_ROLE = 'hardened' ]; then configure_networking_base;fi; configure_apps "/opt/securestack/securestack.yml"
     ;;
-configure_apps)  configure_apps
+configure_network)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; else configure_networking_base;fi
+    ;;
+configure_apps)  configure_apps "/opt/securestack/securestack.yml"
     ;;
 agent)  agent $@
     ;;
 create_user) create_user
     ;;
 provision) provision $@
+    ;;
+profile) profile $@
     ;;
 elasticsearch) elasticsearch $@
     ;;
