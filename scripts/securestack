@@ -289,7 +289,7 @@ firewall () {
 
 }
 
-auth_type {
+auth_type () {
 	echo
         echo "******************************************************************************"
 	echo "To manage Linux instances you will need to create ssh keys or install the"
@@ -297,22 +297,22 @@ auth_type {
 	echo "your Linux instances and is our preferred authentication method." 
         echo "******************************************************************************"
 	echo
-	echo "Do you want to use Kryptonite multi-factor authentication?  [y/N] : " kryptonite_ans
+	read -p "Do you want to use Kryptonite multi-factor authentication?  [y/N] : " kryptonite_ans
         case "$kryptonite_ans" in
                 [yY][eE][sS]|[yY])
-                        mfa_install
+                        #mfa_install
                         ;;
                 *)
-                        ssh_keys
+                        #ssh_keys
                         ;;
         esac
 }
 
-ssh_keys {
-	echo "Do you want to create ssh keys to use with SecureStack now?  [y/N] : " ssh_ans
+ssh_keys () {
+	read -p "Do you want to create ssh keys to use with SecureStack now?  [y/N] : " ssh_ans
        	case "$ssh_ans" in
                [yY][eE][sS]|[yY])
-                       install ssh keys here
+                       #install ssh keys here
                        ;;
                *)
                        echo "You don't have to create ssh keys now but be aware that you will not"
