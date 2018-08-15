@@ -289,6 +289,56 @@ firewall () {
 
 }
 
+auth_type {
+	echo
+        echo "******************************************************************************"
+	echo "To manage Linux instances you will need to create ssh keys or install the"
+	echo "Kryptonite MFA client.  Kryptonite enables multi-factor authentication for"
+	echo "your Linux instances and is our preferred authentication method." 
+        echo "******************************************************************************"
+	echo
+	echo "Do you want to use Kryptonite multi-factor authentication?  [y/N] : " kryptonite_ans
+        case "$kryptonite_ans" in
+                [yY][eE][sS]|[yY])
+                        mfa_install
+                        ;;
+                *)
+                        ssh_keys
+                        ;;
+        esac
+}
+
+ssh_keys {
+	echo "Do you want to create ssh keys to use with SecureStack now?  [y/N] : " ssh_ans
+       	case "$ssh_ans" in
+               [yY][eE][sS]|[yY])
+                       install ssh keys here
+                       ;;
+               *)
+                       echo "You don't have to create ssh keys now but be aware that you will not"
+		       echo "be able to provision with this SecureStack server without defining"
+		       echo "which ssh keys to use.  You can do this manually by importing keys"
+		       echo "into AWS manually and defining the key name in ec2_vars.yml" 
+                       ;;
+        esac
+}
+
+secret () {
+	read -p "Do you want to generate a new authd key? [y/N] : " authd_create
+        case "$authd_create" in
+                [yY][eE][sS]|[yY])
+                        echo "Generating random key now..."
+			authd_key=$(/dev/urandom | tr -dc 'a-fA-F0-9' | fold -w 64 | head -n 1)
+			sudo echo $authd_key > /var/ossec/etc/authd.pass
+			sed -i "s/^authd_password:.*/authd_password: '$authd_key'/g" /opt/securestack/ansible/launch_vars.yml
+                        ;;
+                *)
+                        echo "Skipping authd update.  If you plan on provisioning from this SIPServer"
+			echo "please check that you are using the correct authd key."
+                        ;;
+        esac
+}
+
 create_user () {
 	read -p "Do you want to create a new user for the web ui? [y/N] : " nginx_create
         case "$nginx_create" in
@@ -480,6 +530,7 @@ provision() {
 }
 
 mfa() {
+	command -v kr && export MFA_INSTALLED=yes
 	read -p "Do you want to install Kryptonite Multi Factor Authentication?  " krypt_ans	
 	command -v kr && echo "Kryptonite is already installed.  Exiting... " && exit
 	case "$krypt_ans" in
