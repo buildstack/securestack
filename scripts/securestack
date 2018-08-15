@@ -699,6 +699,8 @@ elasticsearch) elasticsearch $@
     ;;
 mfa) mfa
     ;;
+secret) secret
+    ;;
 update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
     ;;
 status)  status $@
