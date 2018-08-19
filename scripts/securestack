@@ -312,7 +312,7 @@ ssh_keys () {
 	read -p "Do you want to create ssh keys to use with SecureStack now?  [y/N] : " ssh_ans
        	case "$ssh_ans" in
                [yY][eE][sS]|[yY])
-       			read "What do you want to name your ssh keys?  [y/N] : " key_name_ans
+       			read -p "What do you want to name your ssh keys?  [y/N] : " key_name_ans
 			ssh-keygen -t rsa -b 4096 -f /opt/securestack/.ssh/$key_name_ans
 			echo 
 			echo "If you have the AWS cli installed and configured you can use this command to import the new ssh key into"
