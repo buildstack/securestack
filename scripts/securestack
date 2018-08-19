@@ -481,7 +481,7 @@ provision() {
 
 mfa() {
 	read -p "Do you want to install Kryptonite Multi Factor Authentication?  " krypt_ans	
-	command -v kr && echo "Kryptonite is already installed.  Exiting... " && exit
+	command -v kr &>/dev/null && echo "Kryptonite is already installed.  Exiting... " && exit
 	case "$krypt_ans" in
             [yY][eE][sS]|[yY])
                 gpg --keyserver=hkp://pgp.mit.edu:80 --recv-keys "C4A05888A1C4FA02E1566F859F2A29A569653940"
