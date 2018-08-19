@@ -36,7 +36,7 @@ SecureStack Server also has:
 
 ### Initial Installation ###
 
-You can find the latest Installation and User Guide as a Google document](https://docs.google.com/presentation/d/1WY1XRK3NKQes7gHf2NCZsnNvTXytBfuYj3ksJWE7cDQ/edit?usp=sharing "SecureStack Installation and User Guide")  After you've launched a SecureStack Base or Server instance you can ssh into it with the username securestack and the ssh key you provided. The first thing you will want to do is update the SecureStack sofware and operating system.
+You can find the latest [Installation and User Guide published as a Google document](https://docs.google.com/presentation/d/1WY1XRK3NKQes7gHf2NCZsnNvTXytBfuYj3ksJWE7cDQ/edit?usp=sharing "SecureStack Installation and User Guide")  After you've launched a SecureStack Base or Server instance you can ssh into it with the username securestack and the ssh key you provided. The first thing you will want to do is update the SecureStack sofware and operating system.
 
 To update all versions of SecureStack run this from the command line:
 
