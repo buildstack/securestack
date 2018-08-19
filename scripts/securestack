@@ -312,14 +312,25 @@ ssh_keys () {
 	read -p "Do you want to create ssh keys to use with SecureStack now?  [y/N] : " ssh_ans
        	case "$ssh_ans" in
                [yY][eE][sS]|[yY])
-                       #install ssh keys here
-                       ;;
+       			read "What do you want to name your ssh keys?  [y/N] : " key_name_ans
+			ssh-keygen -t rsa -b 4096 -f /opt/securestack/.ssh/$key_name_ans
+			echo 
+			echo "If you have the AWS cli installed and configured you can use this command to import the new ssh key into"
+			echo "your AWS acccount: "
+			echo "aws ec2 import-key-pair --key-name "$key_name_ans" --public-key-material file://~/.ssh/$key_name_ans.pub"
+			echo
+			echo "Otherwise you can manually open https://console.aws.amazon.com/ec2/v2/#KeyPairs:sort=keyName and click the"
+			echo ""Import Key Pair" button at the top and copy the $key_name_ans.pub key contents into the field and click"
+			echo ""Import".  You should now see your new key in the list.  Add this key name to your launch_vars.yml in"
+			echo "/opt/securestack/ansible/ and you will be able to provision new instances using this key."
+			exit
+			;;
                *)
-                       echo "You don't have to create ssh keys now but be aware that you will not"
-		       echo "be able to provision with this SecureStack server without defining"
-		       echo "which ssh keys to use.  You can do this manually by importing keys"
-		       echo "into AWS manually and defining the key name in ec2_vars.yml" 
-                       ;;
+                       	echo "You don't have to create ssh keys now but be aware that you will not"
+		       	echo "be able to provision with this SecureStack server without defining"
+		       	echo "which ssh keys to use.  You can do this manually by importing keys"
+		       	echo "into AWS manually and defining the key name in ec2_vars.yml" 
+                       	;;
         esac
 }
 
