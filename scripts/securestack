@@ -340,7 +340,7 @@ secret () {
                 [yY][eE][sS]|[yY])
                         echo "Generating random key now..."
 			authd_key=$(sudo cat /dev/urandom | tr -dc 'a-fA-F0-9' | fold -w 64 | head -n 1)
-			echo $authd_key | sudo tee -a /var/ossec/etc/authd.pass
+			echo $authd_key | sudo tee /var/ossec/etc/authd.pass
 			sed -i "s/^authd_password:.*/authd_password: '$authd_key'/g" /opt/securestack/ansible/launch_vars.yml
                         ;;
                 *)
