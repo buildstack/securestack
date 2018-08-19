@@ -541,7 +541,7 @@ provision() {
 }
 
 mfa() {
-	command -v kr && export MFA_INSTALLED=yes
+	command -v kr &>/dev/null && export MFA_INSTALLED=yes
 	if [ $MFA_INSTALLED = 'yes' ]; then read -p "Kryptonite Multi-Factor client is already installed.  Do you want to pair it with your Krytonite account? [y/n] " kryp_pair
         case "$kryp_pair" in
             [yY][eE][sS]|[yY])
@@ -556,7 +556,7 @@ mfa() {
 	elif [ $MFA_INSTALLED != 'yes' ]; then 
 		echo "Kryptonite Multi-Factor client is not installed."
 		read -p "Do you want to install Kryptonite Multi Factor Authentication?  " krypt_ans	
-		command -v kr && echo "Kryptonite is already installed.  Exiting... " && exit
+		command -v kr &>/dev/null && echo "Kryptonite is already installed.  Exiting... " && exit
 		case "$krypt_ans" in
             		[yY][eE][sS]|[yY])
                 		gpg --keyserver=hkp://pgp.mit.edu:80 --recv-keys "C4A05888A1C4FA02E1566F859F2A29A569653940"
@@ -730,12 +730,14 @@ mfa) mfa
     ;;
 secret) secret
     ;;
+ssh) ssh_keys
+    ;;
 update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
     ;;
 status)  status $@
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|create_user|update)    "
+    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|update)    "
     echo " "
     exit 1
    ;;
