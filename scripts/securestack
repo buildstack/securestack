@@ -317,7 +317,7 @@ ssh_keys () {
 			echo 
 			echo "If you have the AWS cli installed and configured you can use this command to import the new ssh key into"
 			echo "your AWS acccount: "
-			echo "aws ec2 import-key-pair --key-name "$key_name_ans" --public-key-material file://~/.ssh/$key_name_ans.pub"
+			echo "aws ec2 import-key-pair --key-name \"$key_name_ans\" --public-key-material file://~/.ssh/$key_name_ans.pub"
 			echo
 			echo "Otherwise you can manually open https://console.aws.amazon.com/ec2/v2/#KeyPairs:sort=keyName and click the"
 			echo ""Import Key Pair" button at the top and copy the $key_name_ans.pub key contents into the field and click"
