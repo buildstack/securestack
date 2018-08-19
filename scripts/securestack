@@ -300,10 +300,10 @@ auth_type () {
 	read -p "Do you want to use Kryptonite multi-factor authentication?  [y/N] : " kryptonite_ans
         case "$kryptonite_ans" in
                 [yY][eE][sS]|[yY])
-                        #mfa_install
+                        mfa
                         ;;
                 *)
-                        #ssh_keys
+                        ssh_keys
                         ;;
         esac
 }
@@ -531,21 +531,37 @@ provision() {
 
 mfa() {
 	command -v kr && export MFA_INSTALLED=yes
-	read -p "Do you want to install Kryptonite Multi Factor Authentication?  " krypt_ans	
-	command -v kr && echo "Kryptonite is already installed.  Exiting... " && exit
-	case "$krypt_ans" in
+	if [ $MFA_INSTALLED = 'yes' ]; then read -p "Kryptonite Multi-Factor client is already installed.  Do you want to pair it with your Krytonite account? [y/n] " kryp_pair
+        case "$kryp_pair" in
             [yY][eE][sS]|[yY])
-                gpg --keyserver=hkp://pgp.mit.edu:80 --recv-keys "C4A05888A1C4FA02E1566F859F2A29A569653940"
-		gpg --export --armor C4A05888A1C4FA02E1566F859F2A29A569653940 > /tmp/kryptco.key
-		sudo rpm --import /tmp/kryptco.key
-		sudo yum-config-manager --add-repo https://kryptco.github.io/yum
-		sudo rm -rf /tmp/kryptco.key
-		sudo yum install kr -y
-                ;;
+			kr pair
+			exit 0
+                        ;;
             *)
-                echo "Cancelling new MFA creation."
-                ;;
+                        echo "Not pairing with Kryptonite MFA.  Exiting..."
+			exit 0
+                        ;;
         esac
+	elif [ $MFA_INSTALLED != 'yes' ]; then 
+		echo "Kryptonite Multi-Factor client is not installed."
+		read -p "Do you want to install Kryptonite Multi Factor Authentication?  " krypt_ans	
+		command -v kr && echo "Kryptonite is already installed.  Exiting... " && exit
+		case "$krypt_ans" in
+            		[yY][eE][sS]|[yY])
+                		gpg --keyserver=hkp://pgp.mit.edu:80 --recv-keys "C4A05888A1C4FA02E1566F859F2A29A569653940"
+				gpg --export --armor C4A05888A1C4FA02E1566F859F2A29A569653940 > /tmp/kryptco.key
+				sudo rpm --import /tmp/kryptco.key
+				sudo yum-config-manager --add-repo https://kryptco.github.io/yum
+				sudo rm -rf /tmp/kryptco.key
+				sudo yum install kr -y
+				kr pair
+				exit 0
+                		;;
+            		*)
+                		echo "Cancelling new MFA creation."
+                		;;
+        	esac
+	fi
 }
 
 update_el () {
@@ -681,7 +697,9 @@ start)  start $@
     ;;
 restart)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi; echo "Pausing momentarily..."; sleep 20; start $@
     ;;
-configure)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; create_user; elif [ $SECURESTACK_ROLE = 'hardened' ]; then configure_networking_base;fi; configure_apps "/opt/securestack/securestack.yml"
+configure)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; create_user; elif [ $SECURESTACK_ROLE = 'hardened' ]; then configure_networking_base;fi; 
+            configure_apps "/opt/securestack/securestack.yml";
+            auth_type
     ;;
 configure_network)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; else configure_networking_base;fi
     ;;
@@ -706,7 +724,7 @@ update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
 status)  status $@
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|create_user|update)    "
+    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|create_user|update)    "
     echo " "
     exit 1
    ;;
