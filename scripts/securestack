@@ -106,6 +106,14 @@ start () {
                                 echo "Enabling Rootkit Hunter..." && sudo chmod a+x /etc/cron.daily/rkhunter
                         else echo "Disabling Rootkit Hunter..." && sudo chmod a-x /etc/cron.daily/rkhunter
                         fi
+                        if [ $(grep 'lynis:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+                                echo "Enabling Lynis System Auditing..." && sudo chmod a+x /etc/cron.daily/lynis
+                        else echo "Disabling Lynis System Auditing..." && sudo chmod a-x /etc/cron.daily/lynis
+                        fi
+                        if [ $(grep 'selinux:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+                                echo "Enabling SELinux..." && sudo setenforce 1
+                        else echo "Disabling SELinux..." && sudo setenforce 0
+                        fi
 		
 	elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ]; then
         	echo "SecureStack Role is NAKED"
@@ -335,11 +343,12 @@ ssh_keys () {
 }
 
 secret () {
-	read -p "Do you want to generate a new authd key? [y/N] : " authd_create
+	read -p "Generate a new authd key and configure it for distribution to your base instances?  [y/N] : " authd_create
         case "$authd_create" in
                 [yY][eE][sS]|[yY])
                         echo "Generating random key now..."
 			authd_key=$(sudo cat /dev/urandom | tr -dc 'a-fA-F0-9' | fold -w 64 | head -n 1)
+			echo "Syncing launch_vars.yml and authd.pass now..."
 			echo $authd_key | sudo tee /var/ossec/etc/authd.pass
 			sed -i "s/^authd_password:.*/authd_password: '$authd_key'/g" /opt/securestack/ansible/launch_vars.yml
                         ;;
@@ -370,13 +379,15 @@ create_user () {
 
 configure_apps () {
 	echo "******************************************************************************"
-    	read -p "Do you want to enable clamav anti-virus?  [y/N] : " clamav_ans
-        read -p "Do you want to enable Linux Malware Detect (LMD/maldet)?  [y/N] : " maldet_ans
-        read -p "Do you want to enable fail2ban?  [y/N] : " fail2ban_ans
-        if [[ $SECURESTACK_ROLE != 'server' ]]; then read -p "Do you want to enable Metricbeat?  [y/N] : " metricbeat_ans; fi
-        if [[ $SECURESTACK_ROLE != 'server' ]]; then read -p "Do you want to enable Filebeat?  [y/N] : " filebeat_ans; fi
-	#read -p "Do you want to enable Web Application Firewall? [y/N] " waf_ans
-	read -p "Do you want to enable Rootkit Hunter? [y/N] " rkhunter_ans
+    	read -p "Do you want to enable clamav anti-virus?  [y/n] : " clamav_ans
+        read -p "Do you want to enable Linux Malware Detect (LMD/maldet)?  [y/n] : " maldet_ans
+        read -p "Do you want to enable fail2ban?  [y/n] : " fail2ban_ans
+        if [[ $SECURESTACK_ROLE != 'server' ]]; then read -p "Do you want to enable Metricbeat?  [y/n] : " metricbeat_ans; fi
+        if [[ $SECURESTACK_ROLE != 'server' ]]; then read -p "Do you want to enable Filebeat?  [y/n] : " filebeat_ans; fi
+	#read -p "Do you want to enable Web Application Firewall? [y/n] " waf_ans
+	read -p "Do you want to enable Rootkit Hunter? [y/n] " rkhunter_ans
+        if [[ $SECURESTACK_ROLE != 'server' ]]; then read -p "Do you want to enable SELinux?  [y/n] : " selinux_ans; fi
+        if [[ $SECURESTACK_ROLE != 'server' ]]; then read -p "Do you want to enable Lynis System Auditing?  [y/n] : " lynis_ans; fi
 	echo "******************************************************************************"
 	# clamav section
 	case "$clamav_ans" in
@@ -435,6 +446,26 @@ configure_apps () {
                         ;;
                 *)
                         sed -i "s/^rkhunter:.*/rkhunter: 'disabled'/g" $1
+                        ;;
+        esac
+
+        # selinux section
+        case "$selinux_ans" in
+                [yY][eE][sS]|[yY])
+                        sed -i "s/^selinux:.*/selinux: 'enabled'/g" $1
+                        ;;
+                *)
+                        sed -i "s/^selinux:.*/selinux: 'disabled'/g" $1
+                        ;;
+        esac
+
+        # lynis section
+        case "$lynis_ans" in
+                [yY][eE][sS]|[yY])
+                        sed -i "s/^lynis:.*/lynis: 'enabled'/g" $1
+                        ;;
+                *)
+                        sed -i "s/^lynis:.*/lynis: 'disabled'/g" $1
                         ;;
         esac
 	
@@ -669,7 +700,6 @@ echo "There are $yellow_index YELLOW indices"
 echo "Note: a single node cluster will show all indices as yellow."
 echo "******************************************************************************"
 if [ -f /var/log/lynis.log ]; then sudo grep -o "Hardening index.*" /var/log/lynis.log; fi
-
 }
 
 

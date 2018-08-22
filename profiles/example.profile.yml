@@ -8,6 +8,8 @@ metricbeat: 'disabled'
 filebeat: 'disabled'
 rkhunter: 'disabled'
 waf: 'disabled'
+selinux: 'enabled'
+lynis: 'enabled'
 
 local_net: '172.31.0.0/16'
 
