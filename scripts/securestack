@@ -713,6 +713,12 @@ echo "**************************************************************************
 if [ -f /var/log/lynis.log ]; then sudo grep -o "Hardening index.*" /var/log/lynis.log; fi
 }
 
+version() {
+ss_version=$(grep 'securestack_version:' /etc/securestack.conf | awk '{print $2}')
+echo "SecureStack $SECURESTACK_ROLE Version $ss_version"
+}
+
+
 
 # Variables go here #
 sshome=/opt/securestack
@@ -769,7 +775,7 @@ elasticsearch) elasticsearch $@
     ;;
 mfa) mfa
     ;;
-secret) secret
+secret) secret $@
     ;;
 ssh) ssh_keys
     ;;
