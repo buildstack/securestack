@@ -1,5 +1,8 @@
 #!/bin/bash
-# Written by Paul McCarty <paulm@securestack.com.au> #
+#################################################################################
+# securestack_configure.sh script version 1.2.2					# 
+# Copyright (c) 2017-2018 SecureStack & Paul McCarty <paulm@securestack.com.au> #
+#################################################################################
 
 stop_ubuntu () {
         sudo /var/ossec/bin/ossec-control stop
@@ -710,12 +713,18 @@ echo "There are $green_index GREEN indices"
 echo "There are $yellow_index YELLOW indices"
 echo "Note: a single node cluster will show all indices as yellow."
 echo "******************************************************************************"
+echo
 if [ -f /var/log/lynis.log ]; then sudo grep -o "Hardening index.*" /var/log/lynis.log; fi
+echo
 }
 
 version() {
 ss_version=$(grep 'securestack_version:' /etc/securestack.conf | awk '{print $2}')
 echo "SecureStack $SECURESTACK_ROLE version $ss_version"
+}
+
+securestack_help() {
+echo "usage: " 
 }
 
 # Variables go here #
@@ -777,14 +786,16 @@ secret) secret $@
     ;;
 ssh) ssh_keys
     ;;
-update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
+update) if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
     ;;
-status)  status $@
+status) status $@
     ;;
-version)  version
+version) version
+    ;;
+help) securestack_help
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|update)    "
+    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|update|version)    "
     echo " "
     exit 1
    ;;
