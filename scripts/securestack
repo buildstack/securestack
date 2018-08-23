@@ -343,6 +343,11 @@ ssh_keys () {
 }
 
 secret () {
+	if [ $2 = 'restart' ] && [ $SECURESTACK_ROLE = 'server' ]; then 
+		echo "Restarting authd daemon...";
+		sudo kill $(pgrep ossec-authd);
+		sudo /var/ossec/bin/ossec-authd -i -F 600 -P;
+	fi
 	read -p "Generate a new authd key and configure it for distribution to your base instances?  [y/N] : " authd_create
         case "$authd_create" in
                 [yY][eE][sS]|[yY])
@@ -351,6 +356,7 @@ secret () {
 			echo "Syncing launch_vars.yml and authd.pass now..."
 			echo $authd_key | sudo tee /var/ossec/etc/authd.pass
 			sed -i "s/^authd_password:.*/authd_password: '$authd_key'/g" /opt/securestack/ansible/launch_vars.yml
+			if [[ $SECURESTACK_ROLE = 'server' ]]; then echo "Restarting authd daemon..."; sudo kill $(pgrep ossec-authd); sudo /var/ossec/bin/ossec-authd -i -F 600 -P;fi
                         ;;
                 *)
                         echo "Skipping authd update.  If you plan on provisioning from this SIPServer"
@@ -378,6 +384,8 @@ create_user () {
 }	
 
 configure_apps () {
+	echo 
+	echo "SecureStack Role: $SECURESTACK_ROLE"
 	echo "******************************************************************************"
     	read -p "Do you want to enable clamav anti-virus?  [y/n] : " clamav_ans
         read -p "Do you want to enable Linux Malware Detect (LMD/maldet)?  [y/n] : " maldet_ans
@@ -480,13 +488,15 @@ profile() {
 	case "$2" in
                 [cC][rR][eE][aA][tT][eE]|[cC])
 			if [ -z $3 ]; then echo "Must provide a profile name.  Example: securestack profile create test_profile"; exit 0; fi
+			echo
 			echo "You are creating a new profile.  This will allow you apply which security applications are running"
 			echo "on individual servers or groups of servers."
+			echo
 			if [ -f $sshome/profiles/$3.profile.yml ]; then echo "That profile already exists."; exit 0; fi
 			cp $sshome/profiles/example.profile.yml $sshome/profiles/$3.profile.yml
 			#sed -i "s/^profile_name:.*/profile_name: '$3'/g" 
 			sed -i "/---/a profile_name: $3" ./profiles/$3.profile.yml
-			configure_apps $sshome/profiles/$3.profile.yml
+			SECURESTACK_ROLE='hardened' && configure_apps $sshome/profiles/$3.profile.yml
 			configure_networking_profile $sshome/profiles/$3.profile.yml
 			;;
                 [lL][iI][sS][tT]|[lL])
@@ -765,6 +775,8 @@ ssh) ssh_keys
 update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
     ;;
 status)  status $@
+    ;;
+version)  status $@
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
     echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|update)    "
