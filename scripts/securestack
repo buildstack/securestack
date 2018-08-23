@@ -754,7 +754,7 @@ sudo chown -R securestack:securestack $sshome /etc/securestack.conf
 
 case "$1" in
 
-help)  help
+help)  securestack_help
     ;;
 stop)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi
     ;;
@@ -791,8 +791,6 @@ update) if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
 status) status $@
     ;;
 version) version
-    ;;
-help) securestack_help
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
     echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|update|version)    "
