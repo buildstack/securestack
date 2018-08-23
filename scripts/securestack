@@ -718,8 +718,6 @@ ss_version=$(grep 'securestack_version:' /etc/securestack.conf | awk '{print $2}
 echo "SecureStack $SECURESTACK_ROLE Version $ss_version"
 }
 
-
-
 # Variables go here #
 sshome=/opt/securestack
 
@@ -783,7 +781,7 @@ update)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
     ;;
 status)  status $@
     ;;
-version)  status $@
+version)  version
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
     echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|update)    "
