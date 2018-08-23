@@ -343,10 +343,11 @@ ssh_keys () {
 }
 
 secret () {
-	if [ $2 = 'restart' ] && [ $SECURESTACK_ROLE = 'server' ]; then 
+	if [[ $2 = 'restart' ]] && [ $SECURESTACK_ROLE = 'server' ]; then 
 		echo "Restarting authd daemon...";
 		sudo kill $(pgrep ossec-authd);
 		sudo /var/ossec/bin/ossec-authd -i -F 600 -P;
+		exit 0;
 	fi
 	read -p "Generate a new authd key and configure it for distribution to your base instances?  [y/N] : " authd_create
         case "$authd_create" in
