@@ -77,8 +77,8 @@ start () {
         echo " "
         echo "============================================================================================================================================"
 
-	elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ]; then
-		echo "SecureStack Role is HARDENED"
+	elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 base) -eq 1 ]; then
+		echo "SecureStack Role is Base"
 		echo "Starting wazuh-agent..."; sudo systemctl start wazuh-agent && sudo systemctl enable wazuh-agent
 			if [ $(grep 'fail2ban:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
 				echo "Enabling fail2ban..." && sudo systemctl start fail2ban && sudo systemctl enable fail2ban
@@ -497,7 +497,7 @@ profile() {
 			cp $sshome/profiles/example.profile.yml $sshome/profiles/$3.profile.yml
 			#sed -i "s/^profile_name:.*/profile_name: '$3'/g" 
 			sed -i "/---/a profile_name: $3" ./profiles/$3.profile.yml
-			SECURESTACK_ROLE='hardened' && configure_apps $sshome/profiles/$3.profile.yml
+			SECURESTACK_ROLE='base' && configure_apps $sshome/profiles/$3.profile.yml
 			configure_networking_profile $sshome/profiles/$3.profile.yml
 			;;
                 [lL][iI][sS][tT]|[lL])
@@ -715,7 +715,7 @@ if [ -f /var/log/lynis.log ]; then sudo grep -o "Hardening index.*" /var/log/lyn
 
 version() {
 ss_version=$(grep 'securestack_version:' /etc/securestack.conf | awk '{print $2}')
-echo "SecureStack $SECURESTACK_ROLE Version $ss_version"
+echo "SecureStack $SECURESTACK_ROLE version $ss_version"
 }
 
 # Variables go here #
@@ -731,11 +731,11 @@ fi
 # Find SECURESTACK_ROLE from /etc/securestack.conf file
 if [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ];
         then SECURESTACK_ROLE='server';
-elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ];
-        then SECURESTACK_ROLE='hardened';
+elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 base) -eq 1 ];
+        then SECURESTACK_ROLE='base';
 elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ];
         then SECURESTACK_ROLE='naked';
-else SECURESTACK_ROLE='hardened';
+else SECURESTACK_ROLE='base';
 fi
 
 if [ $SECURESTACK_ROLE != 'server' ]; then rm -rf /opt/securestack/*.md; fi
@@ -753,7 +753,7 @@ start)  start $@
     ;;
 restart)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi; echo "Pausing momentarily..."; sleep 20; start $@
     ;;
-configure)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; create_user; elif [ $SECURESTACK_ROLE = 'hardened' ]; then configure_networking_base;fi; 
+configure)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; create_user; elif [ $SECURESTACK_ROLE = 'base' ]; then configure_networking_base;fi; 
             configure_apps "/opt/securestack/securestack.yml";
             auth_type
     ;;
