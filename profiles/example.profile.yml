@@ -1,6 +1,6 @@
 ---
 profile_name: 'example'
-securestack_role: "hardened"
+securestack_role: "base"
 
 clamav: 'disabled'
 fail2ban: 'enabled'

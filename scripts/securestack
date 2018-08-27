@@ -262,6 +262,7 @@ configure_networking_profile () {
 	case "$ossecserv_ans" in
 		[yY][eE][sS]|[yY])
                		sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I)'#g" $1
+			whitelist=( "${whitelist[@]}" "$(hostname -I)" )
                         ;;
                 *)
                        	read -p "What's the hostname or IP address of the SIPServer that will manage this profile? " sipserver_ans 
