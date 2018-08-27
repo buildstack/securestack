@@ -258,6 +258,16 @@ configure_networking_profile () {
         echo "Writing ${whitelist[@]} to whitelist in $1"
         sed -i "s#^whitelist:.*#whitelist: '$(echo ${whitelist[@]})'#g" $1
 
+	read -p "Will this SecureStack SIPServer manage this profile?  [y/N] : " ossecserv_ans
+	case "$kryptonite_ans" in
+		[yY][eE][sS]|[yY])
+               		sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I)'#g" $1
+                        ;;
+                *)
+                       	read -p "What's the hostname or IP address of the SIPServer that will manage this profile? " sipserver_ans 
+        		sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$sipserver_ans'#g" $1
+                        ;;
+        esac
 }
 
 firewall () {
@@ -793,7 +803,7 @@ status) status $@
 version) version
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|update|version)    "
+    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|profile|update|version)    "
     echo " "
     exit 1
    ;;
