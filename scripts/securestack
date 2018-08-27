@@ -259,7 +259,7 @@ configure_networking_profile () {
         sed -i "s#^whitelist:.*#whitelist: '$(echo ${whitelist[@]})'#g" $1
 
 	read -p "Will this SecureStack SIPServer manage this profile?  [y/N] : " ossecserv_ans
-	case "$kryptonite_ans" in
+	case "$ossecserv_ans" in
 		[yY][eE][sS]|[yY])
                		sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I)'#g" $1
                         ;;
