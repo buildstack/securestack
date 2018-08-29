@@ -65,6 +65,11 @@
         enablerepo: base,epel,extras,updates
         state: latest
       when: ansible_os_family == "RedHat"
+    
+    - name: Grab latest securestack scripts via git
+      shell: git pull
+      args:
+        chdir: /opt/securestack
 
     - name: Run securestack update script
       shell: /opt/securestack/scripts/securestack update
