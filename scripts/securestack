@@ -672,6 +672,28 @@ update_el () {
 	echo "                                       "
 }
 
+autoupdate() {
+        chown -R securestack /opt/securestack;
+        if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
+        if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then
+                git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;
+        fi
+        if [ $SECURESTACK_ROLE = 'server' ]; then
+                grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null' >> /opt/securestack/.bash_profile;
+                source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null;
+        fi
+        if [ -x /etc/yum.repos.d/wazuh.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo;fi
+        if [ -x /etc/yum.repos.d/elastic.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo;fi
+        cd /opt/securestack && git pull --quiet
+        if [ $(yum check-update --quiet |wc -l) != 0 ]; then
+        	echo "******************************************************************************"
+        	echo "There are $(yum check-update --quiet |wc -l) packages that need to be updated."
+        	sudo yum update -y
+        else echo "Your operating system is up to date"
+        fi
+        echo "                                       "
+}
+
 update_ubuntu () {
         if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
         if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
@@ -811,12 +833,14 @@ ssh) ssh_keys
     ;;
 update) if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
     ;;
+autoupdate) if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else autoupdate; fi
+    ;;
 status) status $@
     ;;
 version) version
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|profile|update|version)    "
+    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|profile|update|autoupdate|version)    "
     echo " "
     exit 1
    ;;
