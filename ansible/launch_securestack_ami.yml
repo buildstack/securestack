@@ -70,6 +70,8 @@
       shell: git pull
       args:
         chdir: /opt/securestack
+      become: yes
+      become_user: securestack
 
     - name: Run securestack update script
       shell: /opt/securestack/scripts/securestack update
