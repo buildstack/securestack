@@ -68,6 +68,7 @@
 
     - name: Run securestack update script
       shell: /opt/securestack/scripts/securestack update
+      when: ansible_os_family == "RedHat"
 
     - name: Run securestack update script #2
       shell: /opt/securestack/scripts/securestack update
