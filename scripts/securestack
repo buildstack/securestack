@@ -211,6 +211,9 @@ configure_networking_server () {
 	echo "Writing ${whitelist[@]} to whitelist in $sshome/securestack.yml."
 	sed -i "s#^whitelist:.*#whitelist: '$(echo ${whitelist[@]})'#g" /opt/securestack/securestack.yml
 
+	# echo set the OSSEC server IP below
+        sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I)'#g" /opt/securestack/securestack.yml
+
 	firewall
 }
 
