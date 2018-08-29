@@ -71,6 +71,7 @@
 
     - name: Run securestack update script #2
       shell: /opt/securestack/scripts/securestack update
+      when: ansible_os_family == "RedHat"
 
   roles:
     - { role: 'securestack-ossec-agent', gather_facts: True, become: True, when: securestack_role != 'server' }
