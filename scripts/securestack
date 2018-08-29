@@ -579,13 +579,13 @@ provision() {
                         ;;
 		[hH][oO][sS][tT]|[hH][oO][sS][tT][nN][aA][mM][eE])
                         export ANSIBLE_HOST_KEY_CHECKING=False
-			if [ $4 = 'centos' ]; then 
-                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=$3 image=$centos_image"
-			elif [ $4 = 'ubuntu' ]; then 
-                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=$3 image=$ubuntu_image"
-			elif [ $4 = 'redhat' ]; then 
-                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=$3 image=$redhat_image"
-			fi
+                        if [ $4 = 'centos' ]; then
+                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=$3 image={{ centos_image }}"
+                        elif [ $4 = 'ubuntu' ]; then
+                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=$3 image={{ ubuntu_image }}"
+                        elif [ $4 = 'redhat' ]; then
+                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=$3 image={{ redhat_image }}"
+                        fi
                         ;;
                 [pP][rR][oO][fF]|[pP][rR][oO][fF][iI][lL][eE])
                         if [ $4 = 'hostname' ]; then
