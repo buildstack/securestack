@@ -1,5 +1,7 @@
 # These values never change #
-image: 'ami-57e10f35'
+centos_image: 'ami-57e10f35'
+ubuntu_image: 'ami-2f509b4d'
+redhat_image: 'ami-180dc97a'
 remote_user: 'securestack'
 securestack_role: 'standard'
 
