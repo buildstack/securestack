@@ -682,17 +682,17 @@ update_ubuntu () {
         cd /opt/securestack && git pull --quiet
 	sudo apt-get update
         sudo /usr/lib/update-notifier/apt-check --human-readable
-        echo "******************************************************************************"
-        read -p "Do you want to update your operating system now? [y/n]  " updatenow
-                case "$updatenow" in
-                        [yY][eE][sS]|[yY])
-                                sudo apt-get upgrade
-                        ;;
-                        *)
-                                echo "Not updating operating system."
-                        ;;
-                esac
-        echo "                                       "
+#       echo "******************************************************************************"
+#       read -p "Do you want to update your operating system now? [y/n]  " updatenow
+#               case "$updatenow" in
+#                       [yY][eE][sS]|[yY])
+#                               sudo apt-get upgrade
+#                       ;;
+#                       *)
+#                               echo "Not updating operating system."
+#                       ;;
+#               esac
+#       echo "                                       "
 }
 
 elasticsearch () {
