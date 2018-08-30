@@ -674,7 +674,6 @@ update_el () {
 
 autoupdate() {
         chown -R securestack /opt/securestack;
-        if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
         if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then
                 git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;
         fi
@@ -685,12 +684,15 @@ autoupdate() {
         if [ -x /etc/yum.repos.d/wazuh.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo;fi
         if [ -x /etc/yum.repos.d/elastic.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo;fi
         cd /opt/securestack && git pull --quiet
-        if [ $(yum check-update --quiet |wc -l) != 0 ]; then
-        	echo "******************************************************************************"
-        	echo "There are $(yum check-update --quiet |wc -l) packages that need to be updated."
-        	sudo yum update -y
-        else echo "Your operating system is up to date"
-        fi
+	if [ $os_ver = 'ubuntu' ]; then sudo apt-get update && sudo apt-get -y upgrade; 
+	elif [ $os_ver = 'redhat' ] || [ $os_ver = 'centos' ]; then
+        	if [ $(yum check-update --quiet |wc -l) != 0 ]; then
+        		echo "******************************************************************************"
+        		echo "There are $(yum check-update --quiet |wc -l) packages that need to be updated."
+        		sudo yum update -y
+        	else echo "Your operating system is up to date"
+        	fi
+	fi
         echo "                                       "
 }
 
@@ -775,9 +777,10 @@ echo "usage: "
 sshome=/opt/securestack
 
 # Find version of operating system
-if hash lsb_release 2>/dev/null; then
-        os_ver=$(lsb_release -is);
-elif [ -f /etc/redhat-release ]; then os_ver=$(awk '{print $1}' /etc/redhat-release);
+#if hash lsb_release 2>/dev/null; then
+#        os_ver=$(lsb_release -is);
+if [ -f /etc/redhat-release ] && [ $(sudo grep -i -cim1 red /etc/redhat-release) -eq 1 ]; then os_ver='redhat';
+elif [ -f /etc/redhat-release ] && [ $(sudo grep -i -cim1 cent /etc/redhat-release) -eq 1 ]; then os_ver='centos';
 elif [ -f /etc/debian-version ]; then os_ver=Ubuntu;
 fi
 	
@@ -833,7 +836,7 @@ ssh) ssh_keys
     ;;
 update) if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
     ;;
-autoupdate) if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else autoupdate; fi
+autoupdate) autoupdate
     ;;
 status) status $@
     ;;
