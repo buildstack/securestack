@@ -309,7 +309,7 @@ firewall () {
                         sudo ufw allow proto tcp from $ip to any port 22
                 done
 
-                for ip2 in ${ossec_server_ip[@]}
+                for ip2 in ${ossec_server_arr[@]}
                 do
                         sudo ufw allow proto tcp from $ip2 to any port 22
                 done
