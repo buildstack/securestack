@@ -279,6 +279,7 @@ configure_networking_profile () {
 firewall () {
         whitelist_arr=$(grep ^whitelist $sshome/securestack.yml | sed 's/^.*: //'| sed "s/'//g")
         localnet_arr=$(grep ^local_net $sshome/securestack.yml | sed 's/^.*: //'| sed "s/'//g")
+        ossec_server_arr=$(grep ^ossec_server_ip $sshome/securestack.yml | sed 's/^.*: //'| sed "s/'//g")
 
         echo "******************************************************************************"
         echo "Deleting existing firewall rules..."
@@ -306,6 +307,11 @@ firewall () {
                 for ip in ${whitelist_arr[@]}
                 do
                         sudo ufw allow proto tcp from $ip to any port 22
+                done
+
+                for ip2 in ${ossec_server_ip[@]}
+                do
+                        sudo ufw allow proto tcp from $ip2 to any port 22
                 done
         fi
 
