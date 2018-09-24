@@ -536,6 +536,7 @@ profile() {
 				exit 0; 
 			fi
 			scp $sshome/profiles/$3.profile.yml securestack@$4:$sshome/securestack.yml
+			ssh $4 "$sshome/scripts/securestack update"
 			ssh $4 "$sshome/scripts/securestack restart"
 			ssh $4 "$sshome/scripts/securestack firewall restart"
 			;;
@@ -842,7 +843,7 @@ status) status $@
 version) version
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|profile|update|autoupdate|version)    "
+    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|firewall|create_user|profile|update|autoupdate|version)    "
     echo " "
     exit 1
    ;;
