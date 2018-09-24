@@ -537,6 +537,7 @@ profile() {
 			fi
 			scp $sshome/profiles/$3.profile.yml securestack@$4:$sshome/securestack.yml
 			ssh $4 "$sshome/scripts/securestack restart"
+			ssh $4 "$sshome/scripts/securestack firewall restart"
 			;;
 		[nN][eE][wW]|[nN])
                		echo "You are creating a new profile"
