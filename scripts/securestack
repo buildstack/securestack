@@ -837,19 +837,10 @@ autoupdate) autoupdate
     ;;
 status) status $@
     ;;
-<<<<<<< HEAD
 version) version
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
     echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|profile|update|autoupdate|version)    "
-=======
-autoupdate)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else autoupdate; fi
-    ;;
-status)  status $@
-    ;;
-*)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|create_user|update|autoupdate)    "
->>>>>>> master
     echo " "
     exit 1
    ;;
