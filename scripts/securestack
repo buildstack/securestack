@@ -672,8 +672,14 @@ update_el () {
 	echo "                                       "
 }
 
+<<<<<<< HEAD
 autoupdate() {
         chown -R securestack /opt/securestack;
+=======
+autoupdate () {
+        chown -R securestack /opt/securestack;
+        if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
+>>>>>>> master
         if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then
                 git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;
         fi
@@ -684,6 +690,7 @@ autoupdate() {
         if [ -x /etc/yum.repos.d/wazuh.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo;fi
         if [ -x /etc/yum.repos.d/elastic.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo;fi
         cd /opt/securestack && git pull --quiet
+<<<<<<< HEAD
 	if [ $os_ver = 'ubuntu' ]; then sudo apt-get update && sudo apt-get -y upgrade; 
 	elif [ $os_ver = 'redhat' ] || [ $os_ver = 'centos' ]; then
         	if [ $(yum check-update --quiet |wc -l) != 0 ]; then
@@ -694,6 +701,14 @@ autoupdate() {
         	fi
 	fi
         echo "                                       "
+=======
+        if [ $(yum check-update --quiet |wc -l) != 0 ]; then
+        	echo "There are $(yum check-update --quiet |wc -l) packages that need to be updated."
+        	sudo yum update -y
+        else echo "Your operating system is up to date"
+        fi
+        echo 
+>>>>>>> master
 }
 
 update_ubuntu () {
@@ -846,10 +861,19 @@ autoupdate) autoupdate
     ;;
 status) status $@
     ;;
+<<<<<<< HEAD
 version) version
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
     echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|create_user|profile|update|autoupdate|version)    "
+=======
+autoupdate)  if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else autoupdate; fi
+    ;;
+status)  status $@
+    ;;
+*)  echo "SecureStack copyright 2017 - Paul McCarty"
+    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|create_user|update|autoupdate)    "
+>>>>>>> master
     echo " "
     exit 1
    ;;
