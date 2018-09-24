@@ -10,6 +10,7 @@
   gather_facts: False
   vars_files:
     - launch_vars.yml
+    - securestack_amis.yml
 
   tasks:
 
