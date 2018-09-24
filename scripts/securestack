@@ -791,9 +791,9 @@ if [ $SECURESTACK_ROLE != 'server' ]; then rm -rf /opt/securestack/*.md; fi
 sudo chown -R securestack:securestack $sshome /etc/securestack.conf
 
 # REMOVE ME section
-# Add this to this section that you want to remove.  Example: sed -i '/remove_me/d' $ss_home/scripts/securestack # REMOVE_ME
+# Add this to this section that you want to remove.  Example: sed -i '/remove_me/d' $sshome/scripts/securestack # REMOVE_ME
 first=remove_ && second=me
-sed -i '/remove_me/d' $ss_home/scripts/securestack # ORIGINAL
+sed -i '/remove_me/d' $sshome/scripts/securestack # ORIGINAL
 sudo sed -i '/securestack-server12-ami04/d' /etc/hosts # remove_me
 
 case "$1" in
