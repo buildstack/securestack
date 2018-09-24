@@ -520,7 +520,7 @@ profile() {
 			echo
 			if [ -f $sshome/profiles/$3.profile.yml ]; then echo "That profile already exists."; exit 0; fi
 			cp $sshome/profiles/example.profile.yml $sshome/profiles/$3.profile.yml
-			sed -i "s/^profile_name:.*/profile_name: '$3'/g" 
+			sed -i "s/^profile_name:.*/profile_name: '$3'/g" ./profiles/$3.profile.yml
 			#sed -i "/---/a profile_name: $3" ./profiles/$3.profile.yml
 			SECURESTACK_ROLE='base' && configure_apps $sshome/profiles/$3.profile.yml
 			configure_networking_profile $sshome/profiles/$3.profile.yml
