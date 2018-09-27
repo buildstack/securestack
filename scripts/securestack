@@ -4,7 +4,7 @@
 # Copyright (c) 2017-2018 SecureStack & Paul McCarty <paulm@securestack.com.au> #
 #################################################################################
 
-VERSION=1.2.3
+CONFIG_VERSION=1.2.3
 
 stop_ubuntu () {
         sudo /var/ossec/bin/ossec-control stop
@@ -765,6 +765,7 @@ echo
 version() {
 ss_version=$(grep 'securestack_version:' /etc/securestack.conf | awk '{print $2}')
 echo "SecureStack $SECURESTACK_ROLE version $ss_version"
+echo "Config version $CONFIG_VERSION"
 }
 
 securestack_help() {
