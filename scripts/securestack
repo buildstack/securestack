@@ -695,7 +695,7 @@ autoupdate () {
 }
 
 check_update () {
-	if [[ $os_ver = 'ubuntu' ]]; then sudo apt list --upgradable; 
+	if [[ $os_ver = 'ubuntu' ]]; then echo $(hostname) && sudo apt list --upgradable; 
         elif [[ $os_ver = 'redhat' ]] || [[ $os_ver = 'centos' ]]; then
                 if [[ $(yum check-update --quiet |wc -l) != 0 ]]; then
                         echo "******************************************************************************"
@@ -822,11 +822,11 @@ case "$1" in
 
 help)  securestack_help
     ;;
-stop)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi
+stop)  if [ $os_ver = "ubuntu" ]; then stop_ubuntu; else stop_el; fi
     ;;
 start)  start $@
     ;;
-restart)  if [ $os_ver = "Ubuntu" ]; then stop_ubuntu; else stop_el; fi; echo "Pausing momentarily..."; sleep 20; start $@
+restart)  if [ $os_ver = "ubuntu" ]; then stop_ubuntu; else stop_el; fi; echo "Pausing momentarily..."; sleep 20; start $@
     ;;
 configure)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; create_user; elif [ $SECURESTACK_ROLE = 'base' ]; then configure_networking_base;fi; 
             configure_apps "/opt/securestack/securestack.yml";
@@ -855,7 +855,7 @@ ssh) ssh_keys
     ;;
 firewall) if [[ $2 = 'restart' ]]; then firewall;fi
     ;;
-update) if [ $os_ver = "Ubuntu" ]; then update_ubuntu; else update_el; fi
+update) if [ $os_ver = "ubuntu" ]; then update_ubuntu; else update_el; fi
     ;;
 autoupdate) autoupdate
     ;;
