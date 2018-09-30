@@ -695,7 +695,6 @@ autoupdate () {
 }
 
 check_update () {
-apt list --upgradable
 	if [ $os_ver = 'ubuntu' ]; then sudo apt list --upgradable; 
         elif [ $os_ver = 'redhat' ] || [ $os_ver = 'centos' ]; then
                 if [ $(yum check-update --quiet |wc -l) != 0 ]; then
