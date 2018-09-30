@@ -682,7 +682,7 @@ update_el () {
 autoupdate () {
         chown -R securestack /opt/securestack;
         if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
-	if [ $os_ver = 'ubuntu' ]; then sudo apt-get update && sudo apt-get -y upgrade; 
+	if [ $os_ver = 'ubuntu' ]; then sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get dist-upgrade -y; 
 	elif [ $os_ver = 'redhat' ] || [ $os_ver = 'centos' ]; then
         	if [ $(yum check-update --quiet |wc -l) != 0 ]; then
         		echo "******************************************************************************"
@@ -695,7 +695,7 @@ autoupdate () {
 }
 
 check_update () {
-	if [[ $os_ver = 'ubuntu' ]]; then echo $(hostname) && sudo apt list --upgradable; 
+	if [[ $os_ver = 'ubuntu' ]]; then echo $(hostname) && sudo /usr/lib/update-notifier/apt-check --human-readable;
         elif [[ $os_ver = 'redhat' ]] || [[ $os_ver = 'centos' ]]; then
                 if [[ $(yum check-update --quiet |wc -l) != 0 ]]; then
                         echo "******************************************************************************"
@@ -716,19 +716,9 @@ update_ubuntu () {
                 source /opt/securestack/bin/ansible/hacking/env-setup;
         fi
         cd /opt/securestack && git pull --quiet
-	sudo apt-get update
         sudo /usr/lib/update-notifier/apt-check --human-readable
-#       echo "******************************************************************************"
-#       read -p "Do you want to update your operating system now? [y/n]  " updatenow
-#               case "$updatenow" in
-#                       [yY][eE][sS]|[yY])
-#                               sudo apt-get upgrade
-#                       ;;
-#                       *)
-#                               echo "Not updating operating system."
-#                       ;;
-#               esac
-#       echo "                                       "
+        echo "******************************************************************************"
+	sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get dist-upgrade -y;
 }
 
 elasticsearch () {
