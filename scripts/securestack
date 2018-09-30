@@ -4,7 +4,7 @@
 # Copyright (c) 2017-2018 SecureStack & Paul McCarty <paulm@securestack.com.au> #
 #################################################################################
 
-CONFIG_VERSION=1.2.3
+CONFIG_VERSION=1.2.4_0
 
 stop_ubuntu () {
         sudo /var/ossec/bin/ossec-control stop
@@ -795,8 +795,8 @@ if [ -f /etc/redhat-release ] && [ $(sudo grep -i -cim1 red /etc/redhat-release)
 elif [ -f /etc/redhat-release ] && [ $(sudo grep -i -cim1 cent /etc/redhat-release) -eq 1 ]; then os_ver='centos';
 elif [ -f /etc/debian-version ] || [ -f /etc/debian_version ]; then os_ver=ubuntu;
 fi
-	
-# Find SECURESTACK_ROLE from /etc/securestack.conf file
+
+# Define SECURESTACK_ROLE global var from /etc/securestack.conf file
 if [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ];
         then SECURESTACK_ROLE='server';
 elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 base) -eq 1 ];
@@ -806,10 +806,11 @@ elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 nak
 else SECURESTACK_ROLE='base';
 fi
 
-if [ $SECURESTACK_ROLE != 'server' ]; then rm -rf /opt/securestack/*.md; fi
-
-# Make sure $sshome is owned by securestack:securestack and /etc/securestack.conf
+### CLEAN UP SECTION ###
 sudo chown -R securestack:securestack $sshome /etc/securestack.conf
+sudo chown -R securestack:securestack $sshome $sshome
+sudo rm -rf /opt/securestack/clear_logs.sh
+if [ $SECURESTACK_ROLE != 'server' ]; then rm -rf /opt/securestack/*.md; fi
 
 # REMOVE ME section
 # Add this to this section that you want to remove.  Example: sed -i '/remove_me/d' $sshome/scripts/securestack # REMOVE_ME
