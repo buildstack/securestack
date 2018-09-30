@@ -794,7 +794,7 @@ sshome=/opt/securestack
 #        os_ver=$(lsb_release -is);
 if [ -f /etc/redhat-release ] && [ $(sudo grep -i -cim1 red /etc/redhat-release) -eq 1 ]; then os_ver='redhat';
 elif [ -f /etc/redhat-release ] && [ $(sudo grep -i -cim1 cent /etc/redhat-release) -eq 1 ]; then os_ver='centos';
-elif [ -f /etc/debian-version ]; then os_ver=Ubuntu;
+elif [ -f /etc/debian-version ]; then os_ver=ubuntu;
 fi
 	
 # Find SECURESTACK_ROLE from /etc/securestack.conf file
