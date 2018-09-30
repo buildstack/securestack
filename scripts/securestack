@@ -181,6 +181,15 @@ agent () {
 			else ssh -o StrictHostKeyChecking=no $3 "$sshome/scripts/securestack update"
 			fi
                         ;;
+                [rR][eE][pP][oO][rR][tT]|[rR][eE][pP])
+                        if [ -z $3 ]; then echo "Must supply target.  Example:  securestack agent report 10.0.0.100"; exit 0; fi
+                        if [ $3 = 'all' ]; then echo "Reporting on all machines...";
+                                for i in $(sudo /var/ossec/bin/agent_control -lc | grep -v 127.0.0.1 | grep -o "IP:.*"|awk '{print $2}'|tr -d ,);
+                                        do ssh -o StrictHostKeyChecking=no $i "$sshome/scripts/securestack check_update";
+                                done;
+                        else ssh -o StrictHostKeyChecking=no $3 "$sshome/scripts/securestack check_update"
+                        fi
+                        ;;
                 *)
                         echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info|update)"; exit 0
                         ;;
