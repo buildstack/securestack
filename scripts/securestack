@@ -552,8 +552,7 @@ profile() {
 			fi
 			echo "Copying profile to $4 ..." && scp $sshome/profiles/$3.profile.yml securestack@$4:$sshome/securestack.yml
 			echo "Updating SecureStack on $4 ..." && ssh $4 "$sshome/stack-config update"
-			echo "Configuring services on $4 ..." && ssh $4 "$sshome/stack-config start"
-			echo "Restarting services on $4 ..." && ssh $4 "$sshome/stack-config restart"
+			echo "Configuring services on $4 ..." && ssh $4 "$sshome/stack-config stop && $sshome/stack-config start"
 			echo "Pushing firewall rules to $4 ..." && ssh $4 "$sshome/stack-config firewall restart"
 			;;
 		[nN][eE][wW]|[nN])
