@@ -4,7 +4,7 @@
 # Copyright (c) 2017-2018 SecureStack & Paul McCarty <paulm@securestack.com.au> #
 #################################################################################
 
-CONFIG_VERSION=1.2.4_2
+CONFIG_VERSION=1.2.4_3
 
 stop_ubuntu () {
         sudo /var/ossec/bin/ossec-control stop
