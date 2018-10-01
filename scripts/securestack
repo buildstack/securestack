@@ -4,7 +4,7 @@
 # Copyright (c) 2017-2018 SecureStack & Paul McCarty <paulm@securestack.com.au> #
 #################################################################################
 
-CONFIG_VERSION=1.2.4_0
+CONFIG_VERSION=1.2.4
 
 stop_ubuntu () {
         sudo /var/ossec/bin/ossec-control stop
@@ -176,18 +176,18 @@ agent () {
 			if [ -z $3 ]; then echo "Must supply target.  Example:  securestack agent update 10.0.0.100"; exit 0; fi
 			if [ $3 = 'all' ]; then echo "Updating all machines...";
 				for i in $(sudo /var/ossec/bin/agent_control -lc | grep -v 127.0.0.1 | grep -o "IP:.*"|awk '{print $2}'|tr -d ,); 
-					do ssh -o StrictHostKeyChecking=no $i "$sshome/stack-config update";
+					do ssh -o StrictHostKeyChecking=no $i "$sshome/scripts/securestack update";
 				done;
-			else ssh -o StrictHostKeyChecking=no $3 "$sshome/stack-config update"
+			else ssh -o StrictHostKeyChecking=no $3 "$sshome/scripts/securestack update"
 			fi
                         ;;
                 [rR][eE][pP][oO][rR][tT]|[rR][eE][pP])
                         if [ -z $3 ]; then echo "Must supply target.  Example:  securestack agent report 10.0.0.100"; exit 0; fi
                         if [ $3 = 'all' ]; then echo "Reporting on all machines...";
                                 for i in $(sudo /var/ossec/bin/agent_control -lc | grep -v 127.0.0.1 | grep -o "IP:.*"|awk '{print $2}'|tr -d ,);
-                                        do ssh -o StrictHostKeyChecking=no $i "$sshome/stack-config check_update";
+                                        do ssh -o StrictHostKeyChecking=no $i "$sshome/scripts/securestack check_update";
                                 done;
-                        else ssh -o StrictHostKeyChecking=no $3 "$sshome/stack-config check_update"
+                        else ssh -o StrictHostKeyChecking=no $3 "$sshome/scripts/securestack check_update"
                         fi
                         ;;
                 *)
@@ -551,9 +551,9 @@ profile() {
 				exit 0; 
 			fi
 			echo "Copying profile to $4 ..." && scp $sshome/profiles/$3.profile.yml securestack@$4:$sshome/securestack.yml
-			echo "Updating SecureStack on $4 ..." && ssh $4 "$sshome/stack-config update"
-			echo "Configuring services on $4 ..." && ssh $4 "$sshome/stack-config stop && $sshome/stack-config start"
-			echo "Pushing firewall rules to $4 ..." && ssh $4 "$sshome/stack-config firewall restart"
+			echo "Updating SecureStack on $4 ..." && ssh $4 "$sshome/scripts/securestack update"
+			echo "Configuring services on $4 ..." && ssh $4 "$sshome/scripts/securestack stop && $sshome/scripts/securestack start"
+			echo "Pushing firewall rules to $4 ..." && ssh $4 "$sshome/scripts/securestack firewall restart"
 			;;
 		[nN][eE][wW]|[nN])
                		echo "You are creating a new profile"
@@ -778,7 +778,7 @@ echo
 version() {
 ss_version=$(grep 'securestack_version:' /etc/securestack.conf | awk '{print $2}')
 echo "SecureStack $SECURESTACK_ROLE version $ss_version"
-echo "stack-config version $CONFIG_VERSION"
+echo "$sshome/scripts/securestack version $CONFIG_VERSION"
 }
 
 securestack_help() {
