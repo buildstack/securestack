@@ -728,8 +728,9 @@ update_ubuntu () {
 
 upgrade () {
 	echo "Upgrading your stack-config application ... "
-        mv $sshome/stack-config $sshome/old.stack-config && wget https://securestack.co/downloads/stack-config
+        rm $sshome/stack-config && wget https://securestack.co/downloads/stack-config
         sudo chmod a+x $sshome/stack-config
+	echo "stack-config version $($sshome/stack-config version) installed now."
 }
 
 elasticsearch () {
