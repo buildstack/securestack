@@ -57,7 +57,7 @@ stop_el () {
 }
 
 start () {
-	if [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ]; then
+	if [[ $SECURESTACK_ROLE = 'server' ]];then
 		echo "SecureStack Role is SERVER"
 		echo "Starting Wazuh, Elasticsearch, Logstash, Kibana, Filebeat and Metricbeat"
         	sudo systemctl start wazuh-manager && sudo systemctl enable wazuh-manager
@@ -82,7 +82,7 @@ start () {
         echo " "
         echo "============================================================================================================================================"
 
-	elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 base) -eq 1 ]; then
+	elif [[ $SECURESTACK_ROLE != 'server' ]];then
 		echo "SecureStack Role is Base"
 		echo "Starting wazuh-agent..."; sudo systemctl start wazuh-agent && sudo systemctl enable wazuh-agent
 			if [ $(grep 'fail2ban:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
@@ -120,7 +120,7 @@ start () {
                         else echo "Disabling SELinux..." && sudo setenforce 0
                         fi
 		
-	elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ]; then
+	elif [[ $SECURESTACK_ROLE = 'naked' ]];then
         	echo "SecureStack Role is NAKED"
         	echo "Not doing anything."
 	fi
@@ -191,7 +191,7 @@ agent () {
                         fi
                         ;;
                 *)
-                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info|update)"; exit 0
+                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info|report|update)"; exit 0
                         ;;
         esac
 
@@ -550,10 +550,11 @@ profile() {
 				echo "Must provide a target to apply profile to.  Example: securestack profile apply test_profile server01"; 
 				exit 0; 
 			fi
-			scp $sshome/profiles/$3.profile.yml securestack@$4:$sshome/securestack.yml
-			ssh $4 "$sshome/stack-config update"
-			ssh $4 "$sshome/stack-config restart"
-			ssh $4 "$sshome/stack-config firewall restart"
+			echo "Copying profile to $4 ..." && scp $sshome/profiles/$3.profile.yml securestack@$4:$sshome/securestack.yml
+			echo "Updating SecureStack on $4 ..." && ssh $4 "$sshome/stack-config update"
+			echo "Configuring services on $4 ..." && ssh $4 "$sshome/stack-config start"
+			echo "Restarting services on $4 ..." && ssh $4 "$sshome/stack-config restart"
+			echo "Pushing firewall rules to $4 ..." && ssh $4 "$sshome/stack-config firewall restart"
 			;;
 		[nN][eE][wW]|[nN])
                		echo "You are creating a new profile"
@@ -778,7 +779,7 @@ echo
 version() {
 ss_version=$(grep 'securestack_version:' /etc/securestack.conf | awk '{print $2}')
 echo "SecureStack $SECURESTACK_ROLE version $ss_version"
-echo "Config version $CONFIG_VERSION"
+echo "stack-config version $CONFIG_VERSION"
 }
 
 securestack_help() {
@@ -800,6 +801,8 @@ fi
 if [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ];
         then SECURESTACK_ROLE='server';
 elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 base) -eq 1 ];
+        then SECURESTACK_ROLE='base';
+elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ];
         then SECURESTACK_ROLE='base';
 elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ];
         then SECURESTACK_ROLE='naked';
