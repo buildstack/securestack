@@ -804,43 +804,43 @@ ACTION
 
        Subactions for agent:
 
-       active
-          Get information about instances that are currently active.  Does not require a target parameter.  Information returned includes agent ID number, name and IP address.
-          Example: stack-config agent active
+          active
+              Get information about instances that are currently active.  Does not require a target parameter.  Information returned includes agent ID number, name and IP address.
+              Example: stack-config agent active
 
-       info
-           Get detailed information about a specific agent.  Requires a agent ID number as a target
-           parameter.  Information available are operating system, client version, last keep alive time,
-           last syscheck and last rootcheck.
-           Example: stack-config agent info 011
+          info
+              Get detailed information about a specific agent.  Requires a agent ID number as a target
+              parameter.  Information available are operating system, client version, last keep alive time,
+              last syscheck and last rootcheck.
+              Example: stack-config agent info 011
 
-       list
-           Get information about all instances including active or disconnected agents.  Does not require
-           a target parameter.  Information returned includes agent ID number, name and IP address.
-           Example: stack-config agent list
+          list
+              Get information about all instances including active or disconnected agents.  Does not require
+              a target parameter.  Information returned includes agent ID number, name and IP address.
+              Example: stack-config agent list
 
-       patch
-           List number of outstanding patches or updates that need to be applied.  Requires an IP address
-           or 'all' as a target parameter.
-           Example: stack-config agent patch 172.31.0.100
+          patch
+              List number of outstanding patches or updates that need to be applied.  Requires an IP address
+              or 'all' as a target parameter.
+              Example: stack-config agent patch 172.31.0.100
 
-       restart
-           Restart the agent on a managed instance. Requires a agent ID number or 'all' as a target
-           parameter.  Restarting an agent will usually kick off a syscheck and rootcheck.  Restarting
-           an agent will often fix issues related to changing ssl keys and other configuration
-           modifications.
-           Example: stack-config agent restart 011
+          restart
+              Restart the agent on a managed instance. Requires a agent ID number or 'all' as a target
+              parameter.  Restarting an agent will usually kick off a syscheck and rootcheck.  Restarting
+              an agent will often fix issues related to changing ssl keys and other configuration
+              modifications.
+              Example: stack-config agent restart 011
 
-       scan
-           Manually start a rootcheck and syscheck scan on a managed instance.  Requires a agent ID
-           number or 'all' as a target parameter.  Manually scanning an agent is sometimes necessary,
-           especially if the instance or agent has been turned off or during forensic analysis.
-           Example: stack-config agent scan 011
+          scan
+              Manually start a rootcheck and syscheck scan on a managed instance.  Requires a agent ID
+              number or 'all' as a target parameter.  Manually scanning an agent is sometimes necessary,
+              especially if the instance or agent has been turned off or during forensic analysis.
+              Example: stack-config agent scan 011
 
-       update
-           You can update the agent client version, operating system, stack-config application and more
-           with the update action. Requires an IP address or 'all' as a target parameter.
-           Example: stack-config agent update 011
+          update
+              You can update the agent client version, operating system, stack-config application and more
+              with the update action. Requires an IP address or 'all' as a target parameter.
+              Example: stack-config agent update 011
 
     autoupdate
        Update all software on a managed instance. This includes updating the operating system, applying
@@ -889,19 +889,19 @@ ACTION
 
        Subactions for elasticsearch:
 
-       info
-           Get a status of all Elasticsearch indices and in what state they are in: green, yellow, red.
-           Example: stack-config elasticsearch info
+          info
+              Get a status of all Elasticsearch indices and in what state they are in: green, yellow, red.
+              Example: stack-config elasticsearch info
 
-       list
-           Get a list of all indices and their size.
-           Example: stack-config elasticsearch list
+          list
+              Get a list of all indices and their size.
+              Example: stack-config elasticsearch list
 
-       prune
-           Delete all Metricbeat indices.  This sub-function exists because Metricbeat creates very
-           large indices, often 200MB+ a day.  The prune sub-function allows you to quickly remove
-           those Metriceat indices if they are filling up a filesystem.
-           Example: stack-config elasticsearch prune
+          prune
+              Delete all Metricbeat indices.  This sub-function exists because Metricbeat creates very
+              large indices, often 200MB+ a day.  The prune sub-function allows you to quickly remove
+              those Metriceat indices if they are filling up a filesystem.
+              Example: stack-config elasticsearch prune
 
     firewall
        The firewall function parses the securestack.yml file (and any profiles that modify that file) and
@@ -928,22 +928,22 @@ ACTION
 
        Subactions for profile:
 
-       apply
-          Apply an existing profile to a subset of your infrastructure that is managed by SecureStack.
-          Example: stack-config profile apply all_linux server01
+          apply
+              Apply an existing profile to a subset of your infrastructure that is managed by SecureStack.
+              Example: stack-config profile apply all_linux server01
 
-       create
-          Create a new profile interactively that you can apply to a subset of your infrastructure that
-          is managed by SecureStack.
-          Example: stack-config profile create all_linux
+          create
+              Create a new profile interactively that you can apply to a subset of your infrastructure that
+              is managed by SecureStack.
+              Example: stack-config profile create all_linux
 
-       list
-          List all existing SecureStack profiles.  These profiles are stored in $sshome/profiles.
-          Example: stack-config profile list
+          list
+              List all existing SecureStack profiles.  These profiles are stored in $sshome/profiles.
+              Example: stack-config profile list
 
-       show
-          Show the contents of an existing profile.
-          Example: stack-config profile show
+          show
+              Show the contents of an existing profile.
+              Example: stack-config profile show
 
     provision
        Create new SecureStack Base instances.  These instances will use a default build config which you
@@ -951,25 +951,25 @@ ACTION
 
        Subactions for provision:
 
-       int
-           Provision a new instance interactively.  This process will walk you through the provisioning
-           by asking you questions.
-           Example: stack-config provision int
+          int
+              Provision a new instance interactively.  This process will walk you through the provisioning
+              by asking you questions.
+              Example: stack-config provision int
 
-       hostname
-           Provision a new instance from the stack-config command line interface by defining all values
-           when you run the command. Two things are required to provision successfully:  a hostname and
-           an image name.  Hostname can be anything you want as long as it doesn't have any spaces in
-           the name.  An image name can be: centos ubuntu or redhat
-           Example: stack-config provision hostname test-webserver01 image centos
+          hostname
+              Provision a new instance from the stack-config command line interface by defining all values
+              when you run the command. Two things are required to provision successfully:  a hostname and
+              an image name.  Hostname can be anything you want as long as it doesn't have any spaces in
+              the name.  An image name can be: centos ubuntu or redhat
+              Example: stack-config provision hostname test-webserver01 image centos
 
-       profile
-           Provision a new instance from the stack-config command line interface using an existing
-           profile.  Three things are required to provision successfully:  a hostname, a profile name,
-           and an image name.  Hostname can be anything you want as long as it doesn't have any spaces
-           in the name. A profile has to already exist.  An image name can be: centos ubuntu or redhat.
-           The profile will be applied after initial provisioning of the instance.
-           Example: stack-config provision profile all_linux hostname test-webserver01 image centos
+          profile
+              Provision a new instance from the stack-config command line interface using an existing
+              profile.  Three things are required to provision successfully:  a hostname, a profile name,
+              and an image name.  Hostname can be anything you want as long as it doesn't have any spaces
+              in the name. A profile has to already exist.  An image name can be: centos ubuntu or redhat.
+              The profile will be applied after initial provisioning of the instance.
+              Example: stack-config provision profile all_linux hostname test-webserver01 image centos
 
     restart
        Restart the local SecureStack agent.  On a SIPServer this will restart all the server agents and
