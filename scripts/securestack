@@ -1,10 +1,9 @@
 #!/bin/bash
 #################################################################################
-# securestack_configure.sh script version 1.2.3					# 
 # Copyright (c) 2017-2018 SecureStack & Paul McCarty <paulm@securestack.com.au> #
 #################################################################################
 
-CONFIG_VERSION=1.2.4
+CONFIG_VERSION=1.2.4_5
 
 stop_ubuntu () {
         sudo /var/ossec/bin/ossec-control stop
@@ -65,7 +64,7 @@ start () {
         	sudo systemctl start nginx && sudo systemctl enable nginx
         	sudo systemctl start elasticsearch && sudo systemctl enable elasticsearch
         	sudo systemctl start logstash && sudo systemctl enable logstash
-        	sudo systemctl start kibana && sudo systemctl enable kibana 
+        	sudo systemctl start kibana && sudo systemctl enable kibana
         	sudo systemctl start filebeat && sudo systemctl enable filebeat
         	sudo systemctl start metricbeat && sudo systemctl enable metricbeat
         # Get IP information
@@ -90,7 +89,7 @@ start () {
 			else echo "Disabling fail2ban..." && sudo systemctl stop fail2ban && sudo systemctl disable fail2ban
 			fi
 			if [ $(grep 'clamav:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
-                        	echo "Enabling clamav..." && sudo systemctl start clamd@scan && sudo systemctl enable clamd@scan 
+                        	echo "Enabling clamav..." && sudo systemctl start clamd@scan && sudo systemctl enable clamd@scan
 			else echo "Disabling clamav..." && sudo systemctl stop clamd@scan && sudo systemctl disable clamd@scan
 			fi
 			if [ $(grep 'maldet:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
@@ -98,7 +97,7 @@ start () {
 				grep "/opt/securestack" /usr/local/maldetect/monitor_paths || echo '/opt/securestack' >> /usr/local/maldetect/monitor_paths
                                 echo "Enabling Linux Malware Detect..." && sudo systemctl start maldet && sudo systemctl enable maldet
                         else echo "Disabling maldet..." && sudo systemctl stop maldet && sudo systemctl disable maldet
-                        fi	
+                        fi
 			if [ $(grep 'metricbeat:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
                                 echo "Enabling Metricbeat..." && sudo systemctl start metricbeat && sudo systemctl enable metricbeat
                         else echo "Disabling metricbeat..." && sudo systemctl stop metricbeat && sudo systemctl disable metricbeat
@@ -119,12 +118,12 @@ start () {
                                 echo "Enabling SELinux..." && sudo setenforce 1
                         else echo "Disabling SELinux..." && sudo setenforce 0
                         fi
-		
+
 	elif [[ $SECURESTACK_ROLE = 'naked' ]];then
         	echo "SecureStack Role is NAKED"
         	echo "Not doing anything."
 	fi
-	
+
 }
 
 agent () {
@@ -138,6 +137,11 @@ agent () {
                         sudo /var/ossec/bin/agent_control -lc | grep -v "Wazuh agent_control"
                         ;;
                 [iI][nN][fF][oO]|[iI])
+                        if [[ $3 = 'all' ]]; then
+                                for agents in $(sudo /var/ossec/bin/agent_control -l| grep "ID: "| awk '{print $2}'| sed 's/,//g'); do
+					sudo /var/ossec/bin/agent_control -i $agents;
+				done
+                                exit 0;
 			if [[ $3 -ge 1 ]]; then
                                 sudo /var/ossec/bin/agent_control -i $3;
                                 exit 0;
@@ -181,7 +185,7 @@ agent () {
 			else ssh -o StrictHostKeyChecking=no $3 "$sshome/scripts/securestack update"
 			fi
                         ;;
-                [rR][eE][pP][oO][rR][tT]|[rR][eE][pP])
+                [pP][aA][tT][cC][hH]|[pP])
                         if [ -z $3 ]; then echo "Must supply target.  Example:  securestack agent report 10.0.0.100"; exit 0; fi
                         if [ $3 = 'all' ]; then echo "Reporting on all machines...";
                                 for i in $(sudo /var/ossec/bin/agent_control -lc | grep -v 127.0.0.1 | grep -o "IP:.*"|awk '{print $2}'|tr -d ,);
@@ -191,7 +195,7 @@ agent () {
                         fi
                         ;;
                 *)
-                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info|report|update)"; exit 0
+                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info|patch|update)"; exit 0
                         ;;
         esac
 
@@ -214,7 +218,7 @@ configure_networking_server () {
 	echo "tcp 22 for ssh.  Please be careful as you can lock yourself out of your server if you"
 	echo "enter the wrong values here.  You can cancel by hitting Ctrl-C now which will leave ssh"
 	echo "open but you won't be able to use the web UI until you define this access."
-	echo "---- Hit Ctrl-C now to exit or any key to continue -------------------"; read 
+	echo "---- Hit Ctrl-C now to exit or any key to continue -------------------"; read
         echo "Define your whitelist ips here: "; read -a whitelist
 
 	echo "Writing ${local_net[@]} to local_net in $sshome/securestack.yml."
@@ -279,7 +283,7 @@ configure_networking_profile () {
 			whitelist=( "${whitelist[@]}" "$(hostname -I)" )
                         ;;
                 *)
-                       	read -p "What's the hostname or IP address of the SIPServer that will manage this profile? " sipserver_ans 
+                       	read -p "What's the hostname or IP address of the SIPServer that will manage this profile? " sipserver_ans
         		sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$sipserver_ans'#g" $1
                         ;;
         esac
@@ -336,7 +340,7 @@ auth_type () {
         echo "******************************************************************************"
 	echo "To manage Linux instances you will need to create ssh keys or install the"
 	echo "Kryptonite MFA client.  Kryptonite enables multi-factor authentication for"
-	echo "your Linux instances and is our preferred authentication method." 
+	echo "your Linux instances and is our preferred authentication method."
         echo "******************************************************************************"
 	echo
 	read -p "Do you want to use Kryptonite multi-factor authentication?  [y/N] : " kryptonite_ans
@@ -356,7 +360,7 @@ ssh_keys () {
                [yY][eE][sS]|[yY])
        			read -p "What do you want to name your ssh keys?  [y/N] : " key_name_ans
 			ssh-keygen -t rsa -b 4096 -f /opt/securestack/.ssh/$key_name_ans
-			echo 
+			echo
 			echo "If you have the AWS cli installed and configured you can use this command to import the new ssh key into"
 			echo "your AWS acccount: "
 			echo "aws ec2 import-key-pair --key-name \"$key_name_ans\" --public-key-material file://~/.ssh/$key_name_ans.pub"
@@ -371,13 +375,13 @@ ssh_keys () {
                        	echo "You don't have to create ssh keys now but be aware that you will not"
 		       	echo "be able to provision with this SecureStack server without defining"
 		       	echo "which ssh keys to use.  You can do this manually by importing keys"
-		       	echo "into AWS manually and defining the key name in ec2_vars.yml" 
+		       	echo "into AWS manually and defining the key name in ec2_vars.yml"
                        	;;
         esac
 }
 
 secret () {
-	if [[ $2 = 'restart' ]] && [ $SECURESTACK_ROLE = 'server' ]; then 
+	if [[ $2 = 'restart' ]] && [ $SECURESTACK_ROLE = 'server' ]; then
 		echo "Restarting authd daemon...";
 		sudo kill $(pgrep ossec-authd);
 		sudo /var/ossec/bin/ossec-authd -i -F 600 -P;
@@ -415,11 +419,11 @@ create_user () {
                         ;;
         esac
 
-	#nginx_pass=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w64 | head -n1) 
-}	
+	#nginx_pass=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w64 | head -n1)
+}
 
 configure_apps () {
-	echo 
+	echo
 	echo "SecureStack Role: $SECURESTACK_ROLE"
 	echo "******************************************************************************"
     	read -p "Do you want to enable clamav anti-virus?  [y/n] : " clamav_ans
@@ -434,14 +438,14 @@ configure_apps () {
 	echo "******************************************************************************"
 	# clamav section
 	case "$clamav_ans" in
-    		[yY][eE][sS]|[yY]) 
+    		[yY][eE][sS]|[yY])
         		sed -i "s/^clamav:.*/clamav: 'enabled'/g" $1
         		;;
     		*)
         		sed -i "s/^clamav:.*/clamav: 'disabled'/g" $1
         		;;
 	esac
-	
+
 	# maldet section
         case "$maldet_ans" in
                 [yY][eE][sS]|[yY])
@@ -511,11 +515,11 @@ configure_apps () {
                         sed -i "s/^lynis:.*/lynis: 'disabled'/g" $1
                         ;;
         esac
-	
+
 	if [[ $SECURESTACK_ROLE = 'server' ]]; then sed -i "s/^filebeat:.*/filebeat: 'enabled'/g" $1; fi
 	if [[ $SECURESTACK_ROLE = 'server' ]]; then sed -i "s/^metricbeat:.*/metricbeat: 'enabled'/g" $1; fi
-	
-		
+
+
 }
 
 profile() {
@@ -543,12 +547,12 @@ profile() {
 			;;
                 [aA][pP][pP][lL][yY]|[aA])
 			echo "Applying profile..."
-			if [ -z $3 ]; then 
-				echo "Must provide a profile name and target to apply.  Example: securestack profile apply test_profile server01"; 
-				exit 0; 
+			if [ -z $3 ]; then
+				echo "Must provide a profile name and target to apply.  Example: securestack profile apply test_profile server01";
+				exit 0;
 			elif [ -z $4 ]; then
-				echo "Must provide a target to apply profile to.  Example: securestack profile apply test_profile server01"; 
-				exit 0; 
+				echo "Must provide a target to apply profile to.  Example: securestack profile apply test_profile server01";
+				exit 0;
 			fi
 			echo "Copying profile to $4 ..." && scp $sshome/profiles/$3.profile.yml securestack@$4:$sshome/securestack.yml
 			echo "Updating SecureStack on $4 ..." && ssh $4 "$sshome/scripts/securestack update"
@@ -636,9 +640,9 @@ mfa() {
 			exit 0
                         ;;
         esac
-	elif [ $MFA_INSTALLED != 'yes' ]; then 
+	elif [ $MFA_INSTALLED != 'yes' ]; then
 		echo "Kryptonite Multi-Factor client is not installed."
-		read -p "Do you want to install Kryptonite Multi Factor Authentication?  " krypt_ans	
+		read -p "Do you want to install Kryptonite Multi Factor Authentication?  " krypt_ans
 		command -v kr &>/dev/null && echo "Kryptonite is already installed.  Exiting... " && exit
 		case "$krypt_ans" in
             		[yY][eE][sS]|[yY])
@@ -659,18 +663,15 @@ mfa() {
 }
 
 update_el () {
-	chown -R securestack /opt/securestack;
-	if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
-	if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then 
+	if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then
 		git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;
 	fi
-	if [ $SECURESTACK_ROLE = 'server' ]; then 
+	if [ $SECURESTACK_ROLE = 'server' ]; then
 		grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null' >> /opt/securestack/.bash_profile;
 		source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null;
 	fi
 	if [ -x /etc/yum.repos.d/wazuh.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo;fi
 	if [ -x /etc/yum.repos.d/elastic.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo;fi
-        cd /opt/securestack && git pull --quiet
         if [ $(yum check-update --quiet |wc -l) != 0 ]; then
 	echo "******************************************************************************"
         echo "There are $(yum check-update --quiet |wc -l) packages that need to be updated."
@@ -691,7 +692,7 @@ update_el () {
 autoupdate () {
         chown -R securestack /opt/securestack;
         if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
-	if [ $os_ver = 'ubuntu' ]; then sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get dist-upgrade -y; 
+	if [ $os_ver = 'ubuntu' ]; then sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get dist-upgrade -y;
 	elif [ $os_ver = 'redhat' ] || [ $os_ver = 'centos' ]; then
         	if [ $(yum check-update --quiet |wc -l) != 0 ]; then
         		echo "******************************************************************************"
@@ -724,7 +725,6 @@ update_ubuntu () {
                 grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup' >> /opt/securestack/.bash_profile;
                 source /opt/securestack/bin/ansible/hacking/env-setup;
         fi
-        cd /opt/securestack && git pull --quiet
         sudo /usr/lib/update-notifier/apt-check --human-readable
         echo "******************************************************************************"
 	sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get dist-upgrade -y;
@@ -749,7 +749,7 @@ green_index=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=green" | grep
                                 		echo "Not pruning all metricbeat indices";
                         		;;
                 		esac
-	
+
                 ;;
             [iI][nN][fF][oO]|[iI])
                 echo "There are $green_index GREEN indices"
@@ -760,7 +760,7 @@ green_index=$(curl -s -X GET "localhost:9200/_cat/indices?v&health=green" | grep
                 echo "Must supply verb.  Example:  securestack elasticsearch (list|prune|info)"; exit 0
                 ;;
         esac
-}	
+}
 
 status() {
 echo "******************************************************************************"
@@ -782,7 +782,236 @@ echo "$sshome/scripts/securestack version $CONFIG_VERSION"
 }
 
 securestack_help() {
-echo "usage: " 
+less <<-END
+
+NAME
+    securescripts/securestackure - manage and provision SecureStack resources
+
+SYNOPSIS
+    securestack-configure ACTION | SUBACTION <target>
+
+DESCRIPTION
+    The securestack-configure cli tool allows you to manage existing, or to create new, SecureStack infrastructure.
+
+ACTION
+    ACTION is one of the following:
+
+    agent
+       Manage existing SecureStack agents
+
+       Subactions for agent:
+
+          active
+              Get information about instances that are currently active.  Does not require a target parameter.  Information returned includes agent ID number, name and IP address.
+              Example: scripts/securestack agent active
+
+          info
+              Get detailed information about a specific agent.  Requires an agent ID number or 'all' as a 
+              target parameter.  Information available are operating system, client version, last keep alive
+              time, last syscheck and last rootcheck.
+              Example: scripts/securestack agent info 011
+
+          list
+              Get information about all instances including active or disconnected agents.  Does not require
+              a target parameter.  Information returned includes agent ID number, name and IP address.
+              Example: scripts/securestack agent list
+
+          patch
+              List number of outstanding patches or updates that need to be applied.  Requires an IP address
+              or 'all' as a target parameter.
+              Example: scripts/securestack agent patch 172.31.0.100
+
+          restart
+              Restart the agent on a managed instance. Requires a agent ID number or 'all' as a target
+              parameter.  Restarting an agent will usually kick off a syscheck and rootcheck.  Restarting
+              an agent will often fix issues related to changing ssl keys and other configuration
+              modifications.
+              Example: scripts/securestack agent restart 011
+
+          scan
+              Manually start a rootcheck and syscheck scan on a managed instance.  Requires a agent ID
+              number or 'all' as a target parameter.  Manually scanning an agent is sometimes necessary,
+              especially if the instance or agent has been turned off or during forensic analysis.
+              Example: scripts/securestack agent scan 011
+
+          update
+              You can update the agent client version, operating system, scripts/securestack application and more
+              with the update action. Requires an IP address or 'all' as a target parameter.
+              Example: scripts/securestack agent update 011
+
+    autoupdate
+       Update all software on a managed instance. This includes updating the operating system, applying
+       patches, and upgrading the scripts/securestack application.
+       Example: scripts/securestack autoupdate
+
+    check_update
+       Check to see if there are any outstanding operating system packages or patches to install.  If
+       there are, display the number of packages in total that need to be installed.
+       Example: scripts/securestack check_update
+
+    configure
+       The configure function can be run manually on a SIPServer or Base instance to configure the local
+       networking, firewall and application controls in an interactive way.  Alternately, this function
+       can be called from the scripts/securestack application automatically through the use of profiles.
+       Example: scripts/securestack configure
+
+       The sub-functions that configure steps you through are:
+          * networking
+          * applications
+          * authentication type
+          * MFA secret type
+
+       You can also configure how just the applications are managed with configure_apps.  Similarly,
+       you can configure just networking with configure_network.  Finally, you can configure just the
+       firewall controls locally with firewall.
+
+       To run configure manually you simply give scripts/securestack the configure action.  It will then guide
+       you through an interactive set of questions to configure this local instance.
+       Example: scripts/securestack configure
+
+    configure_apps
+       Configure just the application controls on a local instance.
+       Example: scripts/securestack configure_apps
+
+    configure_network
+       Configure just the network controls on a local instance.
+       Example: scripts/securestack configure_network
+
+    create_user
+       Create a new user for the web UI interactively.
+       Example: scripts/securestack create_user
+
+    elasticsearch
+       Manage your Elasticsearch service on your SIPServer.
+
+       Subactions for elasticsearch:
+
+          info
+              Get a status of all Elasticsearch indices and in what state they are in: green, yellow, red.
+              Example: scripts/securestack elasticsearch info
+
+          list
+              Get a list of all indices and their size.
+              Example: scripts/securestack elasticsearch list
+
+          prune
+              Delete all Metricbeat indices.  This sub-function exists because Metricbeat creates very
+              large indices, often 200MB+ a day.  The prune sub-function allows you to quickly remove
+              those Metriceat indices if they are filling up a filesystem.
+              Example: scripts/securestack elasticsearch prune
+
+    firewall
+       The firewall function parses the securestack.yml file (and any profiles that modify that file) and
+       applies the rules therein to the current firewall state.
+       Example: scripts/securestack firewall
+
+    help
+       Get this help information about SecureStack.
+       Example: scripts/securestack help
+
+    mfa
+       Manage or create your multi-factor authentication (MFA) method.  Usually, with SecureStack this
+       means using Kryptonite.  Kryptonite allows you to use one MFA method across all your SecureStack
+       infrastructure.  This function first checks to make sure that Kryptonite is installed, and if it
+       isn't, it will install it.  Next it authenticates to your companies Kryptonite account and then
+       pairs the local SIPServer to your account.
+       Example: scripts/securestack mfa
+
+    profile
+       Manage your different types of servers in SecureStack with profiles.  For instance, if you want
+       all your linux servers to allow ssh and have an admin group of users allowed access you could
+       create a profile within SecureStack called "all_linux" and you could apply that profile and the
+       security controls it comes with to that group of servers.
+
+       Subactions for profile:
+
+          apply
+              Apply an existing profile to a subset of your infrastructure that is managed by SecureStack.
+              Example: scripts/securestack profile apply all_linux server01
+
+          create
+              Create a new profile interactively that you can apply to a subset of your infrastructure that
+              is managed by SecureStack.
+              Example: scripts/securestack profile create all_linux
+
+          list
+              List all existing SecureStack profiles.  These profiles are stored in $sshome/profiles.
+              Example: scripts/securestack profile list
+
+          show
+              Show the contents of an existing profile.
+              Example: scripts/securestack profile show
+
+    provision
+       Create new SecureStack Base instances.  These instances will use a default build config which you
+       can then modify by applying SecureStack profiles to.
+
+       Subactions for provision:
+
+          int
+              Provision a new instance interactively.  This process will walk you through the provisioning
+              by asking you questions.
+              Example: scripts/securestack provision int
+
+          hostname
+              Provision a new instance from the scripts/securestack command line interface by defining all values
+              when you run the command. Two things are required to provision successfully:  a hostname and
+              an image name.  Hostname can be anything you want as long as it doesn't have any spaces in
+              the name.  An image name can be: centos ubuntu or redhat
+              Example: scripts/securestack provision hostname test-webserver01 image centos
+
+          profile
+              Provision a new instance from the scripts/securestack command line interface using an existing
+              profile.  Three things are required to provision successfully:  a hostname, a profile name,
+              and an image name.  Hostname can be anything you want as long as it doesn't have any spaces
+              in the name. A profile has to already exist.  An image name can be: centos ubuntu or redhat.
+              The profile will be applied after initial provisioning of the instance.
+              Example: scripts/securestack provision profile all_linux hostname test-webserver01 image centos
+
+    restart
+       Restart the local SecureStack agent.  On a SIPServer this will restart all the server agents and
+       on a Base instance this will restart the client agent.
+       Example: scripts/securestack mfa
+
+    secret
+       Interactively manage the authd agent on a SIPServer.  This function syncs the authd password on
+       a SIPServer so that any instances you provision will be able to seamlessly authenticate with the
+       SIPServer and be provisioned SSL keys.
+       Example: scripts/securestack secret
+
+    ssh
+       Interactively create ssh keys that can be used to access your SecureStack Base instances.  Once
+       those keys are created locally, they will be distributed to your cloud provider which will then
+       allow you to use those keys for other SecureStack Base instances.
+       Example: scripts/securestack ssh
+
+    start
+       Start the local SecureStack agents, enable networking services and deploy the firewall config.
+       Example: scripts/securestack start
+
+    status
+       Gives you a quick status of the local SecureStack services and how they are running.
+       Example: scripts/securestack status
+
+    stop
+       Stops the local SecureStack agents, disables networking services and disables the firewall.
+       Example: scripts/securestack stop
+
+    update
+       Updates the local SecureStack software.  This includes operating system patches, packages and
+       kernel updates.  It also includes the Ansible configuration management that runs locally.
+       Example: scripts/securestack update
+
+    upgrade
+       Upgrades the local SecureStack cli tools.
+       Example: scripts/securestack upgrade
+
+    version
+       Gives you the local version of SecureStack running.
+       Example: scripts/securestack version
+
+
+END
 }
 
 # Variables go here #
@@ -830,7 +1059,7 @@ start)  start $@
     ;;
 restart)  if [ $os_ver = "ubuntu" ]; then stop_ubuntu; else stop_el; fi; echo "Pausing momentarily..."; sleep 20; start $@
     ;;
-configure)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; create_user; elif [ $SECURESTACK_ROLE = 'base' ]; then configure_networking_base;fi; 
+configure)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; create_user; elif [ $SECURESTACK_ROLE = 'base' ]; then configure_networking_base;fi;
             configure_apps "/opt/securestack/securestack.yml";
             auth_type
 	    secret
@@ -863,6 +1092,8 @@ autoupdate) autoupdate
     ;;
 check_update) check_update
     ;;
+upgrade) upgrade $@
+    ;;
 status) status $@
     ;;
 version) version
@@ -873,4 +1104,3 @@ version) version
     exit 1
    ;;
 esac
-
