@@ -181,7 +181,7 @@ agent () {
 			else ssh -o StrictHostKeyChecking=no $3 "$sshome/stack-config update"
 			fi
                         ;;
-                [rR][eE][pP][oO][rR][tT]|[rR][eE][pP])
+                [pP][aA][tT][cC][hH]|[pP]
                         if [ -z $3 ]; then echo "Must supply target.  Example:  securestack agent report 10.0.0.100"; exit 0; fi
                         if [ $3 = 'all' ]; then echo "Reporting on all machines...";
                                 for i in $(sudo /var/ossec/bin/agent_control -lc | grep -v 127.0.0.1 | grep -o "IP:.*"|awk '{print $2}'|tr -d ,);
@@ -191,7 +191,7 @@ agent () {
                         fi
                         ;;
                 *)
-                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info|report|update)"; exit 0
+                        echo "Must supply verb.  Example:  securestack agent (list|restart|active|scan|info|patch|update)"; exit 0
                         ;;
         esac
 
@@ -785,7 +785,235 @@ echo "stack-config version $CONFIG_VERSION"
 }
 
 securestack_help() {
-echo "usage: " 
+less <<-END
+
+NAME
+    stack-config - manage and provision SecureStack resources
+
+SYNOPSIS
+    stack-config ACTION | SUBACTION <target>
+
+DESCRIPTION
+    The stack-config cli tool allows you to manage existing, or to create new, SecureStack infrastructure.
+
+ACTION
+    ACTION is one of the following:
+
+     agent
+        Manage existing SecureStack agents
+	
+	Subactions for agent:
+	   
+	  active
+	     Get information about instances that are currently active.  Does not require a target 
+	     parameter.  Information returned includes agent ID number, name and IP address.
+	     Example: stack-config agent active
+
+	  info
+	     Get detailed information about a specific agent.  Requires a agent ID number as a target 
+	     parameter.  Information available are operating system, client version, last keep alive time, 
+	     last syscheck and last rootcheck.
+	     Example: stack-config agent info 011
+
+          list
+             Get information about all instances including active or disconnected agents.  Does not require
+	     a target parameter.  Information returned includes agent ID number, name and IP address.
+             Example: stack-config agent list
+
+          patch
+             List number of outstanding patches or updates that need to be applied.  Requires an IP address
+	     or 'all' as a target parameter.
+             Example: stack-config agent patch 172.31.0.100
+
+          restart
+             Restart the agent on a managed instance. Requires a agent ID number or 'all' as a target
+             parameter.  Restarting an agent will usually kick off a syscheck and rootcheck.  Restarting
+	     an agent will often fix issues related to changing ssl keys and other configuration 
+	     modifications.
+             Example: stack-config agent restart 011
+
+          scan
+             Manually start a rootcheck and syscheck scan on a managed instance.  Requires a agent ID 
+	     number or 'all' as a target parameter.  Manually scanning an agent is sometimes necessary,
+	     especially if the instance or agent has been turned off or during forensic analysis.
+             Example: stack-config agent scan 011
+
+          update
+             You can update the agent client version, operating system, stack-config application and more
+             with the update action. Requires an IP address or 'all' as a target parameter.
+             Example: stack-config agent update 011
+
+     autoupdate
+        Update all software on a managed instance. This includes updating the operating system, applying 
+	patches, and upgrading the stack-config application.
+	Example: stack-config autoupdate
+
+     check_update
+        Check to see if there are any outstanding operating system packages or patches to install.  If 
+	there are, display the number of packages in total that need to be installed.
+
+     configure
+        The configure function can be run manually on a SIPServer or Base instance to configure the local
+	networking, firewall and application controls in an interactive way.  Alternately, this function
+	can be called from the stack-config application automatically through the use of profiles.
+	
+	The sub-functions that configure steps you through are:
+	* networking
+	* applications
+	* authentication type
+	* MFA secret type
+
+	You can also configure how just the applications are managed with configure_apps.  Similarly,
+	you can configure just networking with configure_network.  Finally, you can configure just the
+	firewall controls locally with firewall.
+
+	To run configure manually you simply give stack-config the configure action.  It will then guide
+	you through an interactive set of questions to configure this local instance.
+	Example: stack-config configure
+
+     configure_apps
+        Configure just the application controls on a local instance.
+	Example: stack-config configure_apps
+
+     configure_network
+        Configure just the network controls on a local instance.
+	Example: stack-config configure_network
+
+     create_user
+        Create a new user for the web UI interactively.
+	Example: stack-config create_user
+
+     elasticsearch
+        Manage your Elasticsearch service on your SIPServer.
+
+        Subactions for elasticsearch:
+
+          info
+             Get a status of all Elasticsearch indices and in what state they are in: green, yellow, red.  
+	     Example: stack-config elasticsearch info
+
+          list
+             Get a list of all indices and their size.
+	     Example: stack-config elasticsearch list
+
+          prune
+             Delete all Metricbeat indices.  This sub-function exists because Metricbeat creates very
+	     large indices, often 200MB+ a day.  The prune sub-function allows you to quickly remove
+	     those Metriceat indices if they are filling up a filesystem.
+	     Example: stack-config elasticsearch prune
+
+     firewall
+        The firewall function parses the securestack.yml file (and any profiles that modify that file) and
+	applies the rules therein to the current firewall state.
+	Example: stack-config firewall
+
+     help
+        Get this help information about SecureStack.
+	Example: stack-config help
+
+     mfa
+        Manage or create your multi-factor authentication (MFA) method.  Usually, with SecureStack this 
+	means using Kryptonite.  Kryptonite allows you to use one MFA method across all your SecureStack
+	infrastructure.  This function first checks to make sure that Kryptonite is installed, and if it 
+	isn't, it will install it.  Next it authenticates to your companies Kryptonite account and then
+	pairs the local SIPServer to your account.
+	Example: stack-config mfa
+
+     profile
+        Manage your different types of servers in SecureStack with profiles.  For instance, if you want
+	all your linux servers to allow ssh and have an admin group of users allowed access you could
+	create a profile within SecureStack called "all_linux" and you could apply that profile and the
+	security controls it comes with to that group of servers.
+
+        Subactions for profile:
+
+          apply
+             Apply an existing profile to a subset of your infrastructure that is managed by SecureStack.
+             Example: stack-config profile apply all_linux server01
+
+          create
+             Create a new profile interactively that you can apply to a subset of your infrastructure that
+	     is managed by SecureStack. 
+             Example: stack-config profile create all_linux
+
+          list
+             List all existing SecureStack profiles.  These profiles are stored in $sshome/profiles
+             Example: stack-config profile list
+
+          show
+             Show the contents of an existing profile.
+             Example: stack-config profile show
+
+     provision
+        Create new SecureStack Base instances.  These instances will use a default build config which you
+	can then modify by applying SecureStack profiles to.
+
+        Subactions for provision:
+
+          int
+             Provision a new instance interactively.  This process will walk you through the provisioning
+	     by asking you questions.
+             Example: stack-config provision int
+
+          hostname
+             Provision a new instance from the stack-config command line interface by defining all values
+	     when you run the command. Two things are required to provision successfully:  a hostname and
+	     an image name.  Hostname can be anything you want as long as it doesn't have any spaces in
+	     the name.  An image name can be: centos ubuntu or redhat 
+             Example: stack-config provision hostname test-webserver01 image centos
+
+          profile
+             Provision a new instance from the stack-config command line interface using an existing
+             profile.  Three things are required to provision successfully:  a hostname, a profile name,
+	     and an image name.  Hostname can be anything you want as long as it doesn't have any spaces
+	     in the name. A profile has to already exist.  An image name can be: centos ubuntu or redhat.
+	     The profile will be applied after initial provisioning of the instance.
+             Example: stack-config provision profile all_linux hostname test-webserver01 image centos
+
+     restart
+        Restart the local SecureStack agent.  On a SIPServer this will restart all the server agents and
+	on a Base instance this will restart the client agent.
+	Example: stack-config mfa
+
+     secret
+        Interactively manage the authd agent on a SIPServer.  This function syncs the authd password on
+	a SIPServer so that any instances you provision will be able to seamlessly authenticate with the
+	SIPServer and be provisioned SSL keys. 
+	Example: stack-config secret
+
+     ssh
+        Interactively create ssh keys that can be used to access your SecureStack Base instances.  Once 
+	those keys are created locally, they will be distributed to your cloud provider which will then 
+	allow you to use those keys for other SecureStack Base instances.
+	Example: stack-config ssh
+
+     start
+        Start the local SecureStack agents, enable networking services and deploy the firewall config.  
+	Example: stack-config start
+
+     status
+        Gives you a quick status of the local SecureStack services and how they are running.
+	Example: stack-config status
+
+     stop
+        Stops the local SecureStack agents, disables networking services and disables the firewall.
+        Example: stack-config stop
+
+     update
+        Updates the local SecureStack software.  This includes operating system patches, packages and
+	kernel updates.  It also includes the Ansible configuration management that runs locally.
+        Example: stack-config update
+
+     upgrade
+        Upgrades the local SecureStack cli tools.
+        Example: stack-config upgrade
+
+     version
+        Gives you the local version of SecureStack running.
+        Example: stack-config version
+
+
+END
 }
 
 # Variables go here #
