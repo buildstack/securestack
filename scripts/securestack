@@ -1,10 +1,9 @@
 #!/bin/bash
 #################################################################################
-# securestack_configure.sh script version 1.2.3					#
 # Copyright (c) 2017-2018 SecureStack & Paul McCarty <paulm@securestack.com.au> #
 #################################################################################
 
-CONFIG_VERSION=1.2.4_4
+CONFIG_VERSION=1.2.4_5
 
 stop_ubuntu () {
         sudo /var/ossec/bin/ossec-control stop
@@ -138,6 +137,11 @@ agent () {
                         sudo /var/ossec/bin/agent_control -lc | grep -v "Wazuh agent_control"
                         ;;
                 [iI][nN][fF][oO]|[iI])
+                        if [[ $3 = 'all' ]]; then
+                                for agents in $(sudo /var/ossec/bin/agent_control -l| grep "ID: "| awk '{print $2}'| sed 's/,//g'); do
+					sudo /var/ossec/bin/agent_control -i $agents;
+				done
+                                exit 0;
 			if [[ $3 -ge 1 ]]; then
                                 sudo /var/ossec/bin/agent_control -i $3;
                                 exit 0;
@@ -809,9 +813,9 @@ ACTION
               Example: stack-config agent active
 
           info
-              Get detailed information about a specific agent.  Requires a agent ID number as a target
-              parameter.  Information available are operating system, client version, last keep alive time,
-              last syscheck and last rootcheck.
+              Get detailed information about a specific agent.  Requires an agent ID number or 'all' as a 
+              target parameter.  Information available are operating system, client version, last keep alive
+              time, last syscheck and last rootcheck.
               Example: stack-config agent info 011
 
           list
