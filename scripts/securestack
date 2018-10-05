@@ -4,7 +4,7 @@
 # Copyright (c) 2017-2018 SecureStack & Paul McCarty <paulm@securestack.com.au> #
 #################################################################################
 
-CONFIG_VERSION=1.2.4_3
+CONFIG_VERSION=1.2.4_4
 
 stop_ubuntu () {
         sudo /var/ossec/bin/ossec-control stop
@@ -181,7 +181,7 @@ agent () {
 			else ssh -o StrictHostKeyChecking=no $3 "$sshome/stack-config update"
 			fi
                         ;;
-                [pP][aA][tT][cC][hH]|[pP]
+                [pP][aA][tT][cC][hH]|[pP])
                         if [ -z $3 ]; then echo "Must supply target.  Example:  securestack agent report 10.0.0.100"; exit 0; fi
                         if [ $3 = 'all' ]; then echo "Reporting on all machines...";
                                 for i in $(sudo /var/ossec/bin/agent_control -lc | grep -v 127.0.0.1 | grep -o "IP:.*"|awk '{print $2}'|tr -d ,);
