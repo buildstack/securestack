@@ -142,7 +142,7 @@ agent () {
 					sudo /var/ossec/bin/agent_control -i $agents;
 				done
                                 exit 0;
-			if [[ $3 -ge 1 ]]; then
+			elif [[ $3 -ge 1 ]]; then
                                 sudo /var/ossec/bin/agent_control -i $3;
                                 exit 0;
                         elif [ -z $3 ]; then
