@@ -635,7 +635,6 @@ mfa() {
         case "$kryp_pair" in
             [yY][eE][sS]|[yY])
 			kr pair
-			exit 0
                         ;;
             *)
                         echo "Not pairing with Kryptonite MFA.  Exiting..."
