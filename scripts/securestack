@@ -602,7 +602,7 @@ provision() {
 			# HOSTNAME
                         export ANSIBLE_HOST_KEY_CHECKING=False
 			if [[ -z $4 ]]; then 
-                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=$3 image=centos_image"
+                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=$3 image={{ centos_image }}"
                         elif [[ $4 = 'image' ]]; then
                         ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=$3 image={{ $5_image }}"
                         else echo "Must supply image name.  Example:  securestack provision hostname test-server01 image centos"; exit 0
