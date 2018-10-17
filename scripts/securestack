@@ -77,7 +77,7 @@ start () {
         echo "============================================================================================================================================"
         echo " "
         echo "If you've allowed http access to the internet you can login to the SecureStack Web UI at http://$(curl -s icanhazip.com)"
-        echo "Otherwise you can login to the SecureStack Web UI at http://$(hostname -I)"
+        echo "Otherwise you can login to the SecureStack Web UI at http://$(hostname -I | xargs)"
         echo " "
         echo "============================================================================================================================================"
 
@@ -227,8 +227,8 @@ configure_networking_server () {
 	sed -i "s#^whitelist:.*#whitelist: '$(echo ${whitelist[@]})'#g" /opt/securestack/securestack.yml
 
 	# echo set the OSSEC server IP below
-        sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I)'#g" /opt/securestack/securestack.yml
-        sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I)'#g" /opt/securestack/ansible/launch_vars.yml
+        sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I | xargs)'#g" /opt/securestack/securestack.yml
+        sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I | xargs)'#g" /opt/securestack/ansible/launch_vars.yml
 
 	firewall
 }
@@ -280,8 +280,8 @@ configure_networking_profile () {
 	read -p "Will this SecureStack SIPServer manage this profile?  [y/N] : " ossecserv_ans
 	case "$ossecserv_ans" in
 		[yY][eE][sS]|[yY])
-               		sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I)'#g" $1
-			whitelist=( "${whitelist[@]}" "$(hostname -I)" )
+               		sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I | xargs)'#g" $1
+			whitelist=( "${whitelist[@]}" "$(hostname -I | xargs)" )
                         ;;
                 *)
                        	read -p "What's the hostname or IP address of the SIPServer that will manage this profile? " sipserver_ans
