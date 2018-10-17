@@ -228,6 +228,7 @@ configure_networking_server () {
 
 	# echo set the OSSEC server IP below
         sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I)'#g" /opt/securestack/securestack.yml
+        sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I)'#g" /opt/securestack/ansible/launch_vars.yml
 
 	firewall
 }
