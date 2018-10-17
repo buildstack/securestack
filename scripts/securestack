@@ -3,7 +3,7 @@
 # Copyright (c) 2017-2018 SecureStack & Paul McCarty <paulm@securestack.com.au> #
 #################################################################################
 
-CONFIG_VERSION=1.2.4_5
+CONFIG_VERSION=1.2.4_6
 
 stop_ubuntu () {
         sudo /var/ossec/bin/ossec-control stop
@@ -140,16 +140,16 @@ agent () {
                         if [[ $3 = 'all' ]]; then
                                 echo "==========================================================================" >> /tmp/agent.report.$agent_time;
                                 for agents in $(sudo /var/ossec/bin/agent_control -l| grep -v 127.0.0.1 |grep "ID: "| awk '{print $2}'| sed 's/,//g'); do
-                                         echo "OSSEC Report:  " >> /tmp/agent.report.$agent_time
-                                         sudo /var/ossec/bin/agent_control -i $agents >> /tmp/agent.report.$agent_time;
+                                        echo "OSSEC Report:  " >> /tmp/agent.report.$agent_time
+                                        sudo /var/ossec/bin/agent_control -i $agents >> /tmp/agent.report.$agent_time;
                                         echo "System Audit Report:  " >> /tmp/agent.report.$agent_time;
                                         if [ $(sudo grep -cm1 "WARNING" /var/log/lynis.log) -eq 1 ]; then echo "$(grep WARNING | wc -l /var/log/lynis.log) warnings in total";
                                         else echo "Zero warnings from audit.";fi
                                         echo -n "Audit executed at " && sudo grep "Hardening index" /var/log/lynis.log  >> /tmp/agent.report.$agent_time;
-                                         echo >> /tmp/agent.report.$agent_time
-                                         echo "Firewall Report:  " >> /tmp/agent.report.$agent_time
-                                         ssh $(sudo /var/ossec/bin/agent_control -i $agents |grep "IP address: "|awk '{print $3}') "sudo ufw status" >> /tmp/agent.report.$agent_time;
-                                         echo "==========================================================================" >> /tmp/agent.report.$agent_time;
+                                        echo >> /tmp/agent.report.$agent_time
+                                        echo "Firewall Report:  " >> /tmp/agent.report.$agent_time
+                                        ssh $(sudo /var/ossec/bin/agent_control -i $agents |grep "IP address: "|awk '{print $3}') "sudo ufw status" >> /tmp/agent.report.$agent_time;
+                                        echo "==========================================================================" >> /tmp/agent.report.$agent_time;
                                 done
                                 more /tmp/agent.report.$agent_time;
                                 exit 0;
