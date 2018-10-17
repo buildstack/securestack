@@ -138,12 +138,31 @@ agent () {
                         ;;
                 [iI][nN][fF][oO]|[iI])
                         if [[ $3 = 'all' ]]; then
-                                for agents in $(sudo /var/ossec/bin/agent_control -l| grep "ID: "| awk '{print $2}'| sed 's/,//g'); do
-					sudo /var/ossec/bin/agent_control -i $agents;
-				done
+                                echo "==========================================================================" >> /tmp/agent.report.$agent_time;
+                                for agents in $(sudo /var/ossec/bin/agent_control -l| grep -v 127.0.0.1 |grep "ID: "| awk '{print $2}'| sed 's/,//g'); do
+                                         echo "OSSEC Report:  " >> /tmp/agent.report.$agent_time
+                                         sudo /var/ossec/bin/agent_control -i $agents >> /tmp/agent.report.$agent_time;
+                                        echo "System Audit Report:  " >> /tmp/agent.report.$agent_time;
+                                        if [ $(sudo grep -cm1 "WARNING" /var/log/lynis.log) -eq 1 ]; then echo "$(grep WARNING | wc -l /var/log/lynis.log) warnings in total";
+                                        else echo "Zero warnings from audit.";fi
+                                        echo -n "Audit executed at " && sudo grep "Hardening index" /var/log/lynis.log  >> /tmp/agent.report.$agent_time;
+                                         echo >> /tmp/agent.report.$agent_time
+                                         echo "Firewall Report:  " >> /tmp/agent.report.$agent_time
+                                         ssh $(sudo /var/ossec/bin/agent_control -i $agents |grep "IP address: "|awk '{print $3}') "sudo ufw status" >> /tmp/agent.report.$agent_time;
+                                         echo "==========================================================================" >> /tmp/agent.report.$agent_time;
+                                done
+                                more /tmp/agent.report.$agent_time;
                                 exit 0;
-			elif [[ $3 -ge 1 ]]; then
-                                sudo /var/ossec/bin/agent_control -i $3;
+
+                        elif [[ $3 -ge 1 ]]; then
+                                echo "==========================================================================" >> /tmp/agent.report.$agent_time;
+                                echo "OSSEC Report:  " >> /tmp/agent.report.$agent_time
+                                sudo /var/ossec/bin/agent_control -i $3 >> /tmp/agent.report.$agent_time
+                                echo >> /tmp/agent.report.$agent_time
+                                echo "Firewall Report:  " >> /tmp/agent.report.$agent_time
+                                ssh -q $(sudo /var/ossec/bin/agent_control -i $3 | grep "IP address: "|awk '{print $3}') "sudo ufw status" >> /tmp/agent.report.$agent_time;
+                                echo "==========================================================================" >> /tmp/agent.report.$agent_time;
+                                more /tmp/agent.report.$agent_time;
                                 exit 0;
                         elif [ -z $3 ]; then
                                 echo "Which agents do you want to get info for? "
@@ -291,6 +310,20 @@ configure_networking_profile () {
 }
 
 firewall () {
+        case "$2" in
+                [rR][eE][sS][tT][aA][rR][tT]|[rR])
+                        firewall_restart $@
+                        ;;
+                *)
+                        echo "Must supply verb.  Example:  securestack firewall (restart|apply)"; exit 0
+                        ;;
+        esac
+
+}
+
+
+firewall_restart () {
+        # Get the IP info from $$home/securestack.yml
         whitelist_arr=$(grep ^whitelist $sshome/securestack.yml | sed 's/^.*: //'| sed "s/'//g")
         localnet_arr=$(grep ^local_net $sshome/securestack.yml | sed 's/^.*: //'| sed "s/'//g")
         ossec_server_arr=$(grep ^ossec_server_ip $sshome/securestack.yml | sed 's/^.*: //'| sed "s/'//g")
