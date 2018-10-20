@@ -249,7 +249,7 @@ configure_networking_server () {
         sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I | xargs)'#g" /opt/securestack/securestack.yml
         sed -i "s#^ossec_server_ip:.*#ossec_server_ip: '$(hostname -I | xargs)'#g" /opt/securestack/ansible/launch_vars.yml
 
-	firewall
+	firewall_restart
 }
 
 configure_networking_base () {
@@ -268,7 +268,7 @@ configure_networking_base () {
         echo "Writing ${whitelist[@]} to whitelist in $sshome/securestack.yml."
 	sed -i "s#^whitelist:.*#whitelist: '$(echo ${whitelist[@]})'#g" /opt/securestack/securestack.yml
 
-	firewall
+	firewall_restart
 }
 
 configure_networking_profile () {
@@ -1119,7 +1119,8 @@ secret) secret $@
     ;;
 ssh) ssh_keys
     ;;
-firewall) if [[ $2 = 'restart' ]]; then firewall;fi
+#firewall) if [[ $2 = 'restart' ]]; then firewall;fi
+firewall) firewall "$@
     ;;
 update) if [ $os_ver = "ubuntu" ]; then update_ubuntu; else update_el; fi
     ;;
