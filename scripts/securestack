@@ -1135,8 +1135,8 @@ status) status $@
 version) version
     ;;
 *)  echo "SecureStack copyright 2017 - Paul McCarty"
-    echo "Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|firewall|create_user|profile|update|autoupdate|version)    "
-    echo " "
+    echo 'Usage: securestack (configure|stop|start|agent|configure_network|configure_apps|provision|secret|mfa|ssh|firewall|create_user|profile|update|autoupdate|version)    '
+    echo 
     exit 1
    ;;
 esac
