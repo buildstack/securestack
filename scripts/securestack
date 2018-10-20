@@ -1119,8 +1119,7 @@ secret) secret $@
     ;;
 ssh) ssh_keys
     ;;
-#firewall) if [[ $2 = 'restart' ]]; then firewall;fi
-firewall) firewall "$@
+firewall) firewall "$@"
     ;;
 update) if [ $os_ver = "ubuntu" ]; then update_ubuntu; else update_el; fi
     ;;
