@@ -656,8 +656,7 @@ provision() {
                         fi
                         ;;
                 *)
-			export ANSIBLE_HOST_KEY_CHECKING=False
-                        ansible-playbook $HOME/ansible/launch_securestack_ami.yml -e "host_key_checking=False hostname=securestack-base-$timestamp"
+                                echo "Must supply hostname.  Example:  securestack provision hostname test-server01 image centos"; exit 0
                         ;;
         esac
 
