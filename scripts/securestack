@@ -671,7 +671,7 @@ mfa() {
                         ;;
             *)
                         echo "Not pairing with Kryptonite MFA.  Exiting..."
-			exit 0
+			#exit 0
                         ;;
         esac
 	elif [[ $MFA_INSTALLED != 'yes' ]]; then
@@ -687,7 +687,7 @@ mfa() {
 				sudo rm -rf /tmp/kryptco.key
 				sudo yum install kr -y
 				kr pair
-				exit 0
+				#exit 0
                 		;;
             		*)
                 		echo "Cancelling new MFA creation."
