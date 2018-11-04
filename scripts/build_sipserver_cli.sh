@@ -2,8 +2,10 @@
 
 # These variables will be different for you!
 # This AMI is the Sydney SecureStack SIPServer 1.1 image.  Change as needed.
-AMI=ami-57e10f35
+AMI=ami-cf15dbad
 SECGROUPS='sg-xxxxxxxx sg-xxxxxxxx sg-xxxxxxxx'
+
+if [[ -z $1 ]]; then echo "Must supply a hostname for the SIPServer.  Exiting now... "; exit 0; fi
 
 aws ec2 run-instances --count 1 \
 	--instance-type m4.large \
