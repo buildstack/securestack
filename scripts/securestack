@@ -664,7 +664,7 @@ provision() {
 
 mfa() {
 	command -v kr &>/dev/null && export MFA_INSTALLED=yes
-	if [ $MFA_INSTALLED = 'yes' ]; then read -p "Kryptonite Multi-Factor client is already installed.  Do you want to pair it with your Krytonite account? [y/n] " kryp_pair
+	if [[ $MFA_INSTALLED = 'yes' ]]; then read -p "Kryptonite Multi-Factor client is already installed.  Do you want to pair it with your Krytonite account? [y/n] " kryp_pair
         case "$kryp_pair" in
             [yY][eE][sS]|[yY])
 			kr pair
