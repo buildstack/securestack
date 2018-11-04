@@ -84,37 +84,37 @@ start () {
 	elif [[ $SECURESTACK_ROLE != 'server' ]];then
 		echo "SecureStack Role is Base"
 		echo "Starting wazuh-agent..."; sudo systemctl start wazuh-agent && sudo systemctl enable wazuh-agent
-			if [ $(grep 'fail2ban:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+			if [[ $(grep 'fail2ban:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]]; then
 				echo "Enabling fail2ban..." && sudo systemctl start fail2ban && sudo systemctl enable fail2ban
 			else echo "Disabling fail2ban..." && sudo systemctl stop fail2ban && sudo systemctl disable fail2ban
 			fi
-			if [ $(grep 'clamav:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+			if [[ $(grep 'clamav:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]]; then
                         	echo "Enabling clamav..." && sudo systemctl start clamd@scan && sudo systemctl enable clamd@scan
 			else echo "Disabling clamav..." && sudo systemctl stop clamd@scan && sudo systemctl disable clamd@scan
 			fi
-			if [ $(grep 'maldet:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+			if [[ $(grep 'maldet:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]]; then
 				echo "Adding /mnt /media /home /opt/securestack to maldet monitor dirs." && sudo /usr/local/sbin/maldet --monitor users && sudo /usr/local/sbin/maldet --monitor /home,/mnt,/media
 				grep "/opt/securestack" /usr/local/maldetect/monitor_paths || echo '/opt/securestack' >> /usr/local/maldetect/monitor_paths
                                 echo "Enabling Linux Malware Detect..." && sudo systemctl start maldet && sudo systemctl enable maldet
                         else echo "Disabling maldet..." && sudo systemctl stop maldet && sudo systemctl disable maldet
                         fi
-			if [ $(grep 'metricbeat:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+			if [[ $(grep 'metricbeat:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]]; then
                                 echo "Enabling Metricbeat..." && sudo systemctl start metricbeat && sudo systemctl enable metricbeat
                         else echo "Disabling metricbeat..." && sudo systemctl stop metricbeat && sudo systemctl disable metricbeat
                         fi
-			if [ $(grep 'filebeat:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+			if [[ $(grep 'filebeat:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]]; then
                                 echo "Enabling Filebeat..." && sudo systemctl start filebeat && sudo systemctl enable filebeat
                         else echo "Disabling Filebeat..." && sudo systemctl stop filebeat && sudo systemctl disable filebeat
                         fi
-                        if [ $(grep 'rkhunter:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+                        if [[ $(grep 'rkhunter:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]]; then
                                 echo "Enabling Rootkit Hunter..." && sudo chmod a+x /etc/cron.daily/rkhunter
                         else echo "Disabling Rootkit Hunter..." && sudo chmod a-x /etc/cron.daily/rkhunter
                         fi
-                        if [ $(grep 'lynis:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+                        if [[ $(grep 'lynis:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]]; then
                                 echo "Enabling Lynis System Auditing..." && sudo chmod a+x /etc/cron.daily/lynis
                         else echo "Disabling Lynis System Auditing..." && sudo chmod a-x /etc/cron.daily/lynis
                         fi
-                        if [ $(grep 'selinux:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]; then
+                        if [[ $(grep 'selinux:' ./securestack.yml | grep -i -cim1 enabled) -eq 1 ]]; then
                                 echo "Enabling SELinux..." && sudo setenforce 1
                         else echo "Disabling SELinux..." && sudo setenforce 0
                         fi
@@ -143,7 +143,7 @@ agent () {
                                         echo "OSSEC Report:  " >> /tmp/agent.report.$agent_time
                                         sudo /var/ossec/bin/agent_control -i $agents >> /tmp/agent.report.$agent_time;
                                         echo "System Audit Report:  " >> /tmp/agent.report.$agent_time;
-                                        if [ $(sudo grep -cm1 "WARNING" /var/log/lynis.log) -eq 1 ]; then echo "$(grep WARNING | wc -l /var/log/lynis.log) warnings in total";
+                                        if [[ $(sudo grep -cm1 "WARNING" /var/log/lynis.log) -eq 1 ]]; then echo "$(grep WARNING | wc -l /var/log/lynis.log) warnings in total";
                                         else echo "Zero warnings from audit.";fi
                                         echo -n "Audit executed at " && sudo grep "Hardening index" /var/log/lynis.log  >> /tmp/agent.report.$agent_time;
                                         echo >> /tmp/agent.report.$agent_time
@@ -164,7 +164,7 @@ agent () {
                                 echo "==========================================================================" >> /tmp/agent.report.$agent_time;
                                 more /tmp/agent.report.$agent_time;
                                 exit 0;
-                        elif [ -z $3 ]; then
+                        elif [[ -z $3 ]]; then
                                 echo "Which agents do you want to get info for? "
                                 exit 0;
                         fi
@@ -173,11 +173,11 @@ agent () {
                         if [[ $3 = 'all' ]]; then
                                 sudo /var/ossec/bin/agent_control -Ra;
                                 exit 0;
-                        elif [ -z $3 ]; then
+                        elif [[ -z $3 ]]; then
                                 echo "Which agents do you want to restart?  If you want to restart all instances type all."
                                 echo "Otherwise if you want to restart a specific server supply its agent id."
                                 exit 0;
-                        elif [ $3 -ge 1 ]; then
+                        elif [[ $3 -ge 1 ]]; then
                                 sudo /var/ossec/bin/agent_control -R -u $3;
                                 exit 0;
                         fi
@@ -186,18 +186,18 @@ agent () {
                         if [[ $3 = 'all' ]]; then
                                 sudo /var/ossec/bin/agent_control -ra;
                                 exit 0;
-                        elif [ -z $3 ]; then
+                        elif [[ -z $3 ]]; then
                                 echo "Which agents do you want to scan?  If you want to scan all instances type all."
                                 echo "Otherwise if you want to scan a specific server supply its agent id."
                                 exit 0;
-                        elif [ $3 -ge 1 ]; then
+                        elif [[ $3 -ge 1 ]]; then
                                 sudo /var/ossec/bin/agent_control -r -u $3;
                                 exit 0;
                         fi
                         ;;
                 [uU][pP][dD][aA][tT][eE]|[uU])
-			if [ -z $3 ]; then echo "Must supply target.  Example:  securestack agent update 10.0.0.100"; exit 0; fi
-			if [ $3 = 'all' ]; then echo "Updating all machines...";
+			if [[ -z $3 ]]; then echo "Must supply target.  Example:  securestack agent update 10.0.0.100"; exit 0; fi
+			if [[ $3 = 'all' ]]; then echo "Updating all machines...";
 				for i in $(sudo /var/ossec/bin/agent_control -lc | grep -v 127.0.0.1 | grep -o "IP:.*"|awk '{print $2}'|tr -d ,); 
 					do ssh -o StrictHostKeyChecking=no $i "$sshome/scripts/securestack update";
 				done;
@@ -205,8 +205,8 @@ agent () {
 			fi
                         ;;
                 [pP][aA][tT][cC][hH]|[pP])
-                        if [ -z $3 ]; then echo "Must supply target.  Example:  securestack agent report 10.0.0.100"; exit 0; fi
-                        if [ $3 = 'all' ]; then echo "Reporting on all machines...";
+                        if [[ -z $3 ]]; then echo "Must supply target.  Example:  securestack agent report 10.0.0.100"; exit 0; fi
+                        if [[ $3 = 'all' ]]; then echo "Reporting on all machines...";
                                 for i in $(sudo /var/ossec/bin/agent_control -lc | grep -v 127.0.0.1 | grep -o "IP:.*"|awk '{print $2}'|tr -d ,);
                                         do ssh -o StrictHostKeyChecking=no $i "$sshome/scripts/securestack check_update";
                                 done;
@@ -415,7 +415,7 @@ ssh_keys () {
 }
 
 secret () {
-	if [[ $2 = 'restart' ]] && [ $SECURESTACK_ROLE = 'server' ]; then
+	if [[ $2 = 'restart' ]] && [[ $SECURESTACK_ROLE = 'server' ]]; then
 		echo "Restarting authd daemon...";
 		sudo kill $(pgrep ossec-authd);
 		sudo /var/ossec/bin/ossec-authd -i -F 600 -P;
@@ -560,12 +560,12 @@ profile() {
 	export ANSIBLE_HOST_KEY_CHECKING=False
 	case "$2" in
                 [cC][rR][eE][aA][tT][eE]|[cC])
-			if [ -z $3 ]; then echo "Must provide a profile name.  Example: securestack profile create test_profile"; exit 0; fi
+			if [[ -z $3 ]]; then echo "Must provide a profile name.  Example: securestack profile create test_profile"; exit 0; fi
 			echo
 			echo "You are creating a new profile.  This will allow you apply which security applications are running"
 			echo "on individual servers or groups of servers."
 			echo
-			if [ -f $sshome/profiles/$3.profile.yml ]; then echo "That profile already exists."; exit 0; fi
+			if [[ -f $sshome/profiles/$3.profile.yml ]]; then echo "That profile already exists."; exit 0; fi
 			cp $sshome/profiles/example.profile.yml $sshome/profiles/$3.profile.yml
 			sed -i "s/^profile_name:.*/profile_name: '$3'/g" ./profiles/$3.profile.yml
 			#sed -i "/---/a profile_name: $3" ./profiles/$3.profile.yml
@@ -576,15 +576,15 @@ profile() {
 			grep -s "profile_name: " $sshome/profiles/*.profile.yml | awk '{print $2}'
 			;;
                 [sS][hH][oO][wW]|[sS])
-			if [ -z $3 ]; then echo "Must provide a profile name.  Example: securestack profile show test_profile"; exit 0; fi
+			if [[ -z $3 ]]; then echo "Must provide a profile name.  Example: securestack profile show test_profile"; exit 0; fi
 			cat $sshome/profiles/$3.profile.yml
 			;;
                 [aA][pP][pP][lL][yY]|[aA])
 			echo "Applying profile..."
-			if [ -z $3 ]; then
+			if [[ -z $3 ]]; then
 				echo "Must provide a profile name and target to apply.  Example: securestack profile apply test_profile server01";
 				exit 0;
-			elif [ -z $4 ]; then
+			elif [[ -z $4 ]]; then
 				echo "Must provide a target to apply profile to.  Example: securestack profile apply test_profile server01";
 				exit 0;
 			fi
@@ -644,8 +644,8 @@ provision() {
                         ;;
                 [pP][rR][oO][fF]|[pP][rR][oO][fF][iI][lL][eE])
 			# PROFILE
-                        if [ $4 = 'hostname' ]; then
-                                if [ -z $5 ]; then
+                        if [[ $4 = 'hostname' ]]; then
+                                if [[ -z $5 ]]; then
                                         echo "Must supply hostname.  Example:  securestack provision profile default hostname test-server01"; exit 0
                                 fi
                                 export ANSIBLE_HOST_KEY_CHECKING=False
@@ -674,7 +674,7 @@ mfa() {
 			exit 0
                         ;;
         esac
-	elif [ $MFA_INSTALLED != 'yes' ]; then
+	elif [[ $MFA_INSTALLED != 'yes' ]]; then
 		echo "Kryptonite Multi-Factor client is not installed."
 		read -p "Do you want to install Kryptonite Multi Factor Authentication?  " krypt_ans
 		command -v kr &>/dev/null && echo "Kryptonite is already installed.  Exiting... " && exit
@@ -697,16 +697,16 @@ mfa() {
 }
 
 update_el () {
-	if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then
+	if [[ $SECURESTACK_ROLE = 'server' ]] && [[ ! -d /opt/securestack/bin/ansible/ ]]; then
 		git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;
 	fi
-	if [ $SECURESTACK_ROLE = 'server' ]; then
+	if [[ $SECURESTACK_ROLE = 'server' ]]; then
 		grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null' >> /opt/securestack/.bash_profile;
 		source /opt/securestack/bin/ansible/hacking/env-setup &> /dev/null;
 	fi
-	if [ -x /etc/yum.repos.d/wazuh.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo;fi
-	if [ -x /etc/yum.repos.d/elastic.repo ]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo;fi
-        if [ $(yum check-update --quiet |wc -l) != 0 ]; then
+	if [[ -x /etc/yum.repos.d/wazuh.repo ]]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/wazuh.repo;fi
+	if [[ -x /etc/yum.repos.d/elastic.repo ]]; then sudo sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/elastic.repo;fi
+        if [[ $(yum check-update --quiet |wc -l) != 0 ]]; then
 	echo "******************************************************************************"
         echo "There are $(yum check-update --quiet |wc -l) packages that need to be updated."
                 read -p "Do you want to update your operating system now? [y/n]  " updatenow
@@ -725,10 +725,10 @@ update_el () {
 
 autoupdate () {
         chown -R securestack /opt/securestack;
-        if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
-	if [ $os_ver = 'ubuntu' ]; then sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get dist-upgrade -y;
-	elif [ $os_ver = 'redhat' ] || [ $os_ver = 'centos' ]; then
-        	if [ $(yum check-update --quiet |wc -l) != 0 ]; then
+        if [[ -x /opt/securestack/clear_logs.sh ]]; then rm -rf /opt/securestack/clear_logs.sh; fi
+	if [[ $os_ver = 'ubuntu' ]]; then sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get dist-upgrade -y;
+	elif [[ $os_ver = 'redhat' ]] || [[ $os_ver = 'centos' ]]; then
+        	if [[ $(yum check-update --quiet |wc -l) != 0 ]]; then
         		echo "******************************************************************************"
                         echo "There are $(yum check-update --quiet |wc -l) packages that need to be updated on hostname $(hostname)"
         		sudo yum update -y
@@ -753,9 +753,9 @@ check_update () {
 }
 
 update_ubuntu () {
-        if [ -x /opt/securestack/clear_logs.sh ]; then rm -rf /opt/securestack/clear_logs.sh; fi
-        if [ $SECURESTACK_ROLE = 'server' ] && [ ! -d /opt/securestack/bin/ansible/ ]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
-        if [ $SECURESTACK_ROLE = 'server' ]; then
+        if [[ -x /opt/securestack/clear_logs.sh ]]; then rm -rf /opt/securestack/clear_logs.sh; fi
+        if [[ $SECURESTACK_ROLE = 'server' ]] && [[ ! -d /opt/securestack/bin/ansible/ ]]; then git clone https://github.com/ansible/ansible.git --recursive /opt/securestack/bin/ansible/;fi
+        if [[ $SECURESTACK_ROLE = 'server' ]]; then
                 grep "source /opt/securestack/bin/ansible/hacking/env-setup" ~/.bash_profile || echo 'source /opt/securestack/bin/ansible/hacking/env-setup' >> /opt/securestack/.bash_profile;
                 source /opt/securestack/bin/ansible/hacking/env-setup;
         fi
@@ -805,7 +805,7 @@ echo "There are $yellow_index YELLOW indices"
 echo "Note: a single node cluster will show all indices as yellow."
 echo "******************************************************************************"
 echo
-if [ -f /var/log/lynis.log ]; then sudo grep -o "Hardening index.*" /var/log/lynis.log; fi
+if [[ -f /var/log/lynis.log ]]; then sudo grep -o "Hardening index.*" /var/log/lynis.log; fi
 echo
 }
 
@@ -1054,19 +1054,19 @@ sshome=/opt/securestack
 # Find version of operating system
 #if hash lsb_release 2>/dev/null; then
 #        os_ver=$(lsb_release -is);
-if [ -f /etc/redhat-release ] && [ $(sudo grep -i -cim1 red /etc/redhat-release) -eq 1 ]; then os_ver='redhat';
-elif [ -f /etc/redhat-release ] && [ $(sudo grep -i -cim1 cent /etc/redhat-release) -eq 1 ]; then os_ver='centos';
-elif [ -f /etc/debian-version ] || [ -f /etc/debian_version ]; then os_ver=ubuntu;
+if [[ -f /etc/redhat-release ]] && [[ $(sudo grep -i -cim1 red /etc/redhat-release) -eq 1 ]]; then os_ver='redhat';
+elif [[ -f /etc/redhat-release ]] && [[ $(sudo grep -i -cim1 cent /etc/redhat-release) -eq 1 ]]; then os_ver='centos';
+elif [[ -f /etc/debian-version ]] || [[ -f /etc/debian_version ]]; then os_ver=ubuntu;
 fi
 
 # Define SECURESTACK_ROLE global var from /etc/securestack.conf file
-if [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ];
+if [[ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 server) -eq 1 ]];
         then SECURESTACK_ROLE='server';
-elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 base) -eq 1 ];
+elif [[ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 base) -eq 1 ]];
         then SECURESTACK_ROLE='base';
-elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ];
+elif [[ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 hardened) -eq 1 ]];
         then SECURESTACK_ROLE='base';
-elif [ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ];
+elif [[ $(sudo grep 'securestack_role:' /etc/securestack.conf | grep -i -cim1 naked) -eq 1 ]];
         then SECURESTACK_ROLE='naked';
 else SECURESTACK_ROLE='base';
 fi
@@ -1075,7 +1075,7 @@ fi
 sudo chown -R securestack:securestack $sshome /etc/securestack.conf
 sudo chown -R securestack:securestack $sshome $sshome
 sudo rm -rf /opt/securestack/clear_logs.sh
-if [ $SECURESTACK_ROLE != 'server' ]; then rm -rf /opt/securestack/*.md; fi
+if [[ $SECURESTACK_ROLE != 'server' ]]; then rm -rf /opt/securestack/*.md; fi
 
 # REMOVE ME section
 # Add this to this section that you want to remove.  Example: sed -i '/remove_me/d' $sshome/scripts/securestack # REMOVE_ME
@@ -1087,18 +1087,18 @@ case "$1" in
 
 help)  securestack_help
     ;;
-stop)  if [ $os_ver = "ubuntu" ]; then stop_ubuntu; else stop_el; fi
+stop)  if [[ $os_ver = "ubuntu" ]]; then stop_ubuntu; else stop_el; fi
     ;;
 start)  start $@
     ;;
-restart)  if [ $os_ver = "ubuntu" ]; then stop_ubuntu; else stop_el; fi; echo "Pausing momentarily..."; sleep 20; start $@
+restart)  if [[ $os_ver = "ubuntu" ]]; then stop_ubuntu; else stop_el; fi; echo "Pausing momentarily..."; sleep 20; start $@
     ;;
-configure)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; create_user; elif [ $SECURESTACK_ROLE = 'base' ]; then configure_networking_base;fi;
+configure)  if [[ $SECURESTACK_ROLE = 'server' ]]; then configure_networking_server; create_user; elif [[ $SECURESTACK_ROLE = 'base' ]]; then configure_networking_base;fi;
             configure_apps "/opt/securestack/securestack.yml";
             auth_type
 	    secret
     ;;
-configure_network)  if [ $SECURESTACK_ROLE = 'server' ]; then configure_networking_server; else configure_networking_base;fi
+configure_network)  if [[ $SECURESTACK_ROLE = 'server' ]]; then configure_networking_server; else configure_networking_base;fi
     ;;
 configure_apps)  configure_apps "/opt/securestack/securestack.yml"
     ;;
@@ -1120,7 +1120,7 @@ ssh) ssh_keys
     ;;
 firewall) firewall "$@"
     ;;
-update) if [ $os_ver = "ubuntu" ]; then update_ubuntu; else update_el; fi
+update) if [[ $os_ver = "ubuntu" ]]; then update_ubuntu; else update_el; fi
     ;;
 autoupdate) autoupdate
     ;;
